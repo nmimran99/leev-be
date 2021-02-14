@@ -4,11 +4,12 @@ const Schema = mongoose.Schema;
 const faultSchema = new Schema({
     title: String,
     description: String,
+    location: String,
     site: { type: Schema.Types.ObjectId, ref: 'Site'},
     system: { type: Schema.Types.ObjectId, ref: 'System'},
     following: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
-    status: { type: Schema.Types.ObjectId, ref: 'Status'},
+    status: String,
     images: [],
     comments: [],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'}

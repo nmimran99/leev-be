@@ -55,3 +55,7 @@ export const removeUser = async (req) => {
     const { systemId, userId} = req.body;
     return await System.findOneAndUpdate({_id: systemId}, { $pull: { 'linkedUsers': userId }}, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'site'}, {path: 'linkedUsers'}]);
 }
+
+export const getSystemsOptions = async (req) => {
+    return await System.find({}, '_id name');
+}

@@ -9,6 +9,7 @@ import authRoute from './routes/auth';
 import siteRoute from './routes/site';
 import systemRoute from './routes/system';
 import statusRoute from './routes/status';
+import faultRoute from './routes/fault';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import Grid from 'gridfs-stream';
@@ -27,6 +28,7 @@ app.use('/auth', authRoute);
 app.use('/sites', siteRoute);
 app.use('/systems', systemRoute);
 app.use('/statuses', statusRoute);
+app.use('/faults', faultRoute);
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true });
 mongoose.connection.once('open', () => {
