@@ -84,9 +84,9 @@ export const removeUser = async (req, res) => {
     } 
 }
 
-export const getAllSystemNames = async (req, res) => {
+export const getSystemsOptions = async (req, res) => {
     try{
-        let data = await systemService.removeUser(req);
+        let data = await systemService.getSystemsOptions(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);

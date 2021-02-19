@@ -38,7 +38,7 @@ const additionalDetails = new Schema({
 
 const systemSchema = new Schema({
     name: String,
-    site: { type: Schema.Types.ObjectId, ref: 'Site'},
+    asset: { type: Schema.Types.ObjectId, ref: 'Asset'},
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     linkedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     data: additionalDetails

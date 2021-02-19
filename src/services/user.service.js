@@ -1,40 +1,26 @@
 import User from '../models/user';
-import Joi from '@hapi/joi';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import jwt_decode from 'jwt-decode';
-import path from 'path';
 import fs from 'fs';
+import path from 'path';
 import { generateAccessToken, authenticate, genereateResetPasswordUrl } from './auth.service';
 import { sendMail } from '../smtp/mail';
+import { relocateFile } from '../api/generic';
 
-const valSchema = Joi.object({
-    email: Joi.string().min(6).required().email(),
-    password: Joi.string().min(8).required(),
-    firstName: Joi.string(),
-    lastName: Joi.string(),
-    phoneNumber: Joi.string(),
-    birthDate: Joi.date().max("now"),
-    createdBy: Joi.string()
-});
 
 export const registerUser = async (req) => {
-    const validation  = valSchema.validate(req.body);
-
-    if (validation.error) {
-        return validation;
-    }
 
     let errors =  await checkUnique(req);
     if( errors.email ) {
         return errors;
     };
-
-
+    
     let salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(req.body.password, salt);
-  
+
     let user = new User({
+        tenant: req.body.tenantId,
         email: req.body.email,
         password: hashedPassword,
         firstName: req.body.firstName,
@@ -42,19 +28,58 @@ export const registerUser = async (req) => {
         phoneNumber: req.body.phoneNumber,
         birthDate: req.body.birthDate,
         createdBy: req.body.createdBy,
-        // avatar: {
-        //     data: fs.readFileSync(path.join(__dirname + '/uploads/' + req.file.filename)),
-        //     contentType: req.file.contentType
-        // }
+        avatar: req.file.filename
     });
 
-    return await user.save();
+    let savedUser = await user.save();
+    let newURL = await relocateFile(savedUser.avatar, savedUser._id, 'users');
+    savedUser.avatar = newURL;
+    return await savedUser.save();
 
 };
 
-
 export const uploadAvatar = async (req) => {
-    return true
+    const { userId } = req.body;
+    if (!req.file) return;
+    const user = await User.findOne({_id: userId}, 'avatar');
+    if (!user) return;
+    
+    if (user.avatar) {
+        let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
+        if (fs.existsSync(oldAvatar)) {
+            fs.unlinkSync(oldAvatar);
+        }
+    }
+    
+    let newAvatar = req.file.filename;
+    let newURL = await relocateFile(newAvatar, userId, 'users');
+    return await User.findOneAndUpdate({ _id: userId }, { avatar: newURL},{ new: true });
+}
+
+export const removeAvatar = async (req) => {
+    const { userId } = req.body;
+    if (!userId) return;
+    const user = await User.findOne({ _id: userId });
+    if (!user) return;
+    
+    if (user.avatar) {
+        let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
+        if (fs.existsSync(oldAvatar)) {
+            fs.unlinkSync(oldAvatar);
+        }
+    }
+    return await User.findOneAndUpdate({ _id: userId }, { avatar: null},{ new: true });
+}
+
+export const disableUser = async (req) => {
+    const { userId } = req.body;
+    return await User.findOneAndUpdate({ _id: userId}, { isActive: false});
+}
+
+
+export const enableUser = async (req) => {
+    const { userId } = req.body;
+    return await User.findOneAndUpdate({ _id: userId}, { isActive: true});
 }
 
 export const checkUnique = async (req) => {
@@ -119,10 +144,12 @@ export const reloginUser = async (req) => {
 }
 
 export const deleteUser = async (req) => {
-    const { userId } = req.body.user;
-    const res = await User.findByIdAndDelete({ _id: userId });
-    if (res) return true;
-    return false;
+    const { userId } = req.body;
+    let userFolder = `${process.env.FS_LOCAL}/users/${userId}`
+    if (fs.existsSync(userFolder)) {
+        fs.rmdirSync(userFolder, { recursive: true});
+    }
+    return await User.findOneAndDelete({ _id: userId });
 }
 
 export const resetPasswordLink = async (req) => {
@@ -185,8 +212,9 @@ export const getUserList = async (req) => {
     return User.find({}, '_id firstName lastName phoneNumber avatar');
 }
 
-export const getUserData = async (req) => { 
-    return await User.find({ _id: req.body.userId }, '_id firstName lastName phoneNumber avatar');
+export const getUsersData = async (req) => { 
+    const { userList } = req.body;
+    return await User.find({ _id: { $in: userList}}, '_id firstName lastName phoneNumber avatar');
 }
 
 export const getUserDataById = async (req) => { 

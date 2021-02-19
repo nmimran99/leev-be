@@ -18,7 +18,8 @@ const addInfoSchema = new Schema({
     units: Number
 })
 
-const siteSchema = new Schema({
+const assetSchema = new Schema({
+    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
     address: addressSchema,
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     type: String,
@@ -29,4 +30,4 @@ const siteSchema = new Schema({
     timestamps: true
 });
 
-module.exports = mongoose.model('Site', siteSchema);
+module.exports = mongoose.model('Asset', assetSchema);

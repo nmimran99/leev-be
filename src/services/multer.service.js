@@ -1,25 +1,49 @@
 
 import multer from 'multer';
-import GridFsStorage from 'multer-gridfs-storage';
 import path from 'path';
 
-const storage = new GridFsStorage({
-    url: `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb`,
-    file: (req, file) => {
-        return new Promise((resolve, reject) => {
-            crypto.randomBytes(16, (err, buf) => {
-                if (err) {
-                    return reject(err)
-                }
-                const filename = buf.toString('hex') + path.extname(file.originalname);
-                const fileInfo = {
-                    filename: filename, 
-                    becketName: 'uploads'
-                };
-                resolve(fileInfo);
-            })
-        })
+const  avatarStorage = multer.diskStorage({
+    destination: function (req, file, cb) {
+      cb(null, './public/uploads/')
+    },
+    filename: function (req, file, cb) {
+      cb(null, 'avatar_' + Date.now() + path.extname(file.originalname))
+    },
+    fileFilter: function (req, file, cb) {
+        const fileTypes = /jpeg|jpg|png/;
+        const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetpye = fileTypes.test(file.mimetpye);
+        
+        if (mimetpye && extname) {
+            return cb(null, true);
+        } else {
+            cb('Error: Images only');
+        }
+
     }
-});
+})
+
+const  faultStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, './public/uploads/')
+  },
+  filename: function (req, file, cb) {
+    cb(null, 'fault_' + Date.now() + path.extname(file.originalname))
+  },
+  fileFilter: function (req, file, cb) {
+      const fileTypes = /jpeg|jpg|png/;
+      const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+      const mimetpye = fileTypes.test(file.mimetpye);
+      
+      if (mimetpye && extname) {
+          return cb(null, true);
+      } else {
+          cb('Error: Images only');
+      }
+
+  }
+})
+
+ export const uploadAvatar  = multer({ storage: avatarStorage });
+ export const uploadFaultImage  = multer({ storage: faultStorage });
  
-export const upload = multer({ storage });

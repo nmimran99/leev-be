@@ -1,6 +1,5 @@
 import * as userService from '../services/user.service';
 import * as authService from '../services/auth.service';
-import labels from '../assets/data/labels'
 
 export const registerUser = async (req, res) => {
     try{
@@ -17,6 +16,33 @@ export const registerUser = async (req, res) => {
 export const uploadAvatar = async (req, res) => {
     try{
         let data = await userService.uploadAvatar(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
+export const removeAvatar = async (req, res) => {
+    try{
+        let data = await userService.removeAvatar(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
+export const disableUser = async (req, res) => {
+    try{
+        let data = await userService.disableUser(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
+export const enableUser = async (req, res) => {
+    try{
+        let data = await userService.enableUser(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -59,9 +85,9 @@ export const deleteUser = async (req, res) => {
     try {
         const deleteUser = await userService.deleteUser(req);
         if (deleteUser) {
-            return res.status(200).send(`User ${ req.body.user.userId } was successfully deleted`);
+            return res.status(500).send(deleteUser);   
         }
-        return res.status(500).send('unable to delete user');
+        return res.status(200).send(`User ${ req.body.userId } was successfully deleted`);
     } catch(e) {
         return res.status(500).send(e.message)
     }
@@ -105,7 +131,7 @@ export const getUserList = async (req, res) => {
  
 }
 
-export const getUserData = async (req, res) => {
+export const getUsersData = async (req, res) => {
     try {
         let data = await userService.getUserData(req);
         return res.status(200).send(data)

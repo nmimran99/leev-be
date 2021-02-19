@@ -4,7 +4,7 @@ const Schema = mongoose.Schema;
 const documentSchema = new Schema({
     title: String,
     description: String,
-    siteId: Schema.Types.ObjectId,
+    assetId: Schema.Types.ObjectId,
     systemId: Schema.Types.ObjectId,
     linkedUsers: [],
     files: [],

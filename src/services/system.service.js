@@ -2,12 +2,13 @@ import System from '../models/system';
 
 
 export const createSystem = async (req) => {
-    const { assetId, owner, linkedUsers, name  } = req.body;
+    const { assetId, owner, linkedUsers, name, data  } = req.body;
     let system = new System({
        name, 
-       site: assetId,
+       asset: assetId,
        owner,
-       linkedUsers
+       linkedUsers,
+       data
     })
 
     return await system.save();
@@ -16,7 +17,12 @@ export const createSystem = async (req) => {
 
 export const getSystems = async (req) => {
     const { assetId } = req.body;
-    return await System.find({ site: assetId}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'site'}, {path: 'linkedUsers'}])
+    return await System.find({ asset: assetId})
+                        .populate([
+                            { path: 'owner', select: 'firstName lastName phoneNumber avatar'}, 
+                            { path: 'asset'},
+                            { path: 'linkedUsers', select: 'firstName lastName avatar' }     
+                        ])
 }
 
 export const removeSystem = async (req) => {
@@ -33,12 +39,12 @@ export const editSystemName = async (req) => {
 
 export const addUsers = async (req) => {
     const { systemId, users } = req.body;
-    return await System.findOneAndUpdate({_id: systemId}, { linkedUsers: users}, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'site'}, {path: 'linkedUsers'}]);
+    return await System.findOneAndUpdate({_id: systemId}, { linkedUsers: users}, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'asset'}, {path: 'linkedUsers'}]);
 }
 
 export const addUser = async (req) => {
     const { systemId, userId } = req.body;
-    return await System.findOneAndUpdate({_id: systemId}, { $push: { 'linkedUsers': userId} }, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'site'}, {path: 'linkedUsers'}]);
+    return await System.findOneAndUpdate({_id: systemId}, { $push: { 'linkedUsers': userId} }, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'asset'}, {path: 'linkedUsers'}]);
 }
 
 export const updateSystemOwner = async (req) => {
@@ -53,9 +59,13 @@ export const updateSystemName = async (req) => {
 
 export const removeUser = async (req) => {
     const { systemId, userId} = req.body;
-    return await System.findOneAndUpdate({_id: systemId}, { $pull: { 'linkedUsers': userId }}, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'site'}, {path: 'linkedUsers'}]);
+    return await System.findOneAndUpdate({_id: systemId}, { $pull: { 'linkedUsers': userId }}, { new: true}).populate([{ path: 'owner', select: 'firstName lastName phoneNumber'}, { path: 'asset'}, {path: 'linkedUsers'}]);
 }
 
 export const getSystemsOptions = async (req) => {
-    return await System.find({}, '_id name');
+    let q = {};
+    if (req.body.asset) {
+        q.asset = req.body.asset
+    }
+    return await System.find(q, '_id name asset').populate('asset');
 }

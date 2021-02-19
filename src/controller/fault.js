@@ -55,4 +55,31 @@ export const getFaults = async (req, res) => {
     }  
 }
 
+export const getFault = async (req, res) => {
+    try{
+        let data = await faultService.getFault(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
+export const addFaultComment = async (req, res) => {
+    try{
+        let data = await faultService.addFaultComment(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+export const deleteFaultComment = async (req, res) => {
+    try{
+        let data = await faultService.deleteFaultComment(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
+
 

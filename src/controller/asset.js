@@ -1,63 +1,63 @@
-import * as siteService from '../services/site.service';
+import * as assetService from '../services/asset.service';
 import * as userSrevice from '../services/user.service';
 
-export const createSite = async (req, res) => {
+export const createAsset = async (req, res) => {
     try{
-        let data = await siteService.createSite(req);
+        let data = await assetService.createAsset(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const updateSiteAddress = async (req, res) => {
+export const updateAssetAddress = async (req, res) => {
     try{
-        let data = await siteService.updateSiteAddress(req);
+        let data = await assetService.updateAssetAddress(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const updateSiteOwner = async (req, res) => {
+export const updateAssetOwner = async (req, res) => {
     try{
-        let data = await siteService.updateSiteOwner(req);
+        let data = await assetService.updateAssetOwner(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const updateSiteType = async (req, res) => {
+export const updateAssetType = async (req, res) => {
     try{
-        let data = await siteService.updateSiteType(req);
+        let data = await assetService.updateAssetType(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const getSites = async (req, res) => {
+export const getAssets = async (req, res) => {
     try{
-        let data = await siteService.getSites(req);
+        let data = await assetService.getAssets(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const getSite = async (req, res) => {
+export const getAsset = async (req, res) => {
     try{
-        let data = await siteService.getSite(req);
+        let data = await assetService.getAsset(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const removeSite = async (req, res) => {
+export const removeAsset = async (req, res) => {
     try{
-        let data = await siteService.removeSite(req);
+        let data = await assetService.removeAsset(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
