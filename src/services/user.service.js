@@ -116,7 +116,7 @@ export const reloginUser = async (req) => {
     } catch(e) {
         return { auth: false, message: "could not decode token", user: null, token: null}
     };
-    const user = await User.findOne({ _id: decodedToken.id }, '_id username firstName lastName email');
+    const user = await User.findOne({ _id: decodedToken.id }, '_id username firstName lastName email avatar tenant');
     return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
         if (!user) return { auth: false, message: 'user token not linked to a user', user: null, token: null};
         if (err) {

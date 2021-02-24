@@ -15,6 +15,7 @@ router.post('/updateSystemOwner', controller.updateSystemOwner);
 router.post('/updateSystemName', controller.updateSystemName);
 router.post('/removeUser', controller.removeUser);
 router.post('/getSystemsOptions', controller.getSystemsOptions);
+router.post('/updateSystemData', controller.updateSystemData);
 
 
 // TODO

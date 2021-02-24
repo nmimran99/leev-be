@@ -2,18 +2,12 @@ import Asset from '../models/asset';
 import User from '../models/user'
 
 export const createAsset = async (req) => {
-    const { tenantId, userId, country, province, city, street, streetNumber, entrance, zipcode, owner, type, addInfo  } = req.body;
+    const { tenantId, userId, address, owner, type, addInfo  } = req.body;
+
+    console.log(req.body)
     let asset = new Asset({
         tenant: tenantId,
-        address: {
-            country,
-            province,
-            city,
-            street,
-            streetNumber,
-            entrance,
-            zipcode,
-        },
+        address: { ...address },
         owner,
         type,
         addInfo,

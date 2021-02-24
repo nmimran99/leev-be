@@ -5,7 +5,7 @@ import { uploadFaultImage } from '../services/multer.service';
 
 const router = Router();
 
-router.post('/createFault', uploadFaultImage.array('faultImages', 10), controller.createFault);
+router.post('/createFault', uploadFaultImage.array('images', 10), controller.createFault);
 router.post('/deleteFault', controller.deleteFault);
 router.post('/updateFollowingUsers', controller.updateFollowingUsers);
 router.post('/updateFaultOwner', controller.updateFaultOwner);

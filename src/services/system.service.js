@@ -2,10 +2,10 @@ import System from '../models/system';
 
 
 export const createSystem = async (req) => {
-    const { assetId, owner, linkedUsers, name, data  } = req.body;
+    const { asset, owner, linkedUsers, name, data  } = req.body;
     let system = new System({
        name, 
-       asset: assetId,
+       asset,
        owner,
        linkedUsers,
        data
@@ -68,4 +68,10 @@ export const getSystemsOptions = async (req) => {
         q.asset = req.body.asset
     }
     return await System.find(q, '_id name asset').populate('asset');
+}
+
+export const updateSystemData = async (req) => {
+    const { systemData } = req.body;
+    console.log(systemData)
+    return await System.findOneAndUpdate({ _id: systemData.system }, { data: systemData.data }, { new: true});
 }

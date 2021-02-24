@@ -3,8 +3,10 @@ import Comment from '../models/comment';
 import { relocateFile } from '../api/generic';
 
 export const createFault = async (req) => {
-    const { title, description, asset, system, owner, createdBy  } = req.body;
+    const { title, description, asset, system, owner, following, createdBy  } = req.body;
+    console.log(req.body)
     let images = [];
+
     if (req.files.length) { 
         req.files.forEach(f => {
             images.push(f.filename)
@@ -17,6 +19,7 @@ export const createFault = async (req) => {
        asset,
        system,
        owner,
+       following: following || [],
        status: { statusId: 'ready', state: 'open', order: '1'},
        createdBy,
        images,

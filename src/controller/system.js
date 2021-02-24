@@ -92,3 +92,12 @@ export const getSystemsOptions = async (req, res) => {
         return res.status(500).send(e.message);
     } 
 }
+
+export const updateSystemData = async (req, res) => {
+    try{
+        let data = await systemService.updateSystemData(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    } 
+}
