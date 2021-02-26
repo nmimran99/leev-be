@@ -10,6 +10,7 @@ export const createFault = async (req, res) => {
     }  
 }
 
+
 export const deleteFault = async (req, res) => {
     try{
         let data = await faultService.deleteFault(req);

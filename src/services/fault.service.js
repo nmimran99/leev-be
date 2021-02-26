@@ -4,7 +4,6 @@ import { relocateFile } from '../api/generic';
 
 export const createFault = async (req) => {
     const { title, description, asset, system, owner, following, createdBy  } = req.body;
-    console.log(req.body)
     let images = [];
 
     if (req.files.length) { 
@@ -49,16 +48,33 @@ export const updateFollowingUsers = async (req) => {
 
 export const updateFaultOwner = async (req) => {
     const { faultId, userId } = req.body;
-    return await Fault.findOneAndUpdate( { _id: faultId }, { owner: userId }, { new: true }).populate([{ path: 'owner', select: 'firstName lastName phoneNumber' }]);
+    return await Fault.findOneAndUpdate( { _id: faultId }, { owner: userId }, { new: true }).populate([{ path: 'owner', select: 'firstName lastName phoneNumber avatar' }]);
 }
 
 export const updateFaultData = async (req) => {
-    const { faultId, title, description, asset, system } = req.body;
-    return await Fault.findOneAndUpdate( { _id: faultId }, { title, description, asset, system }, { new: true })
+    const { _id, faultId, title, description, asset, system, following, owner } = req.body;
+    
+    let prepImages = [];
+    let images = [];
+    if (req.files.length) { 
+        req.files.forEach(f => {
+            images.push(f.filename)
+        })
+    }
+    await Promise.all(images.map(async (image, index) => {
+        let newURL = await relocateFile(image, _id, 'faults');
+        prepImages[index] = newURL;
+    }));
+
+    return await Fault.findOneAndUpdate( { _id: _id }, { 
+        title, description, asset, system, following, owner, 
+        $push: { images: prepImages} 
+    }, { new: true })
         .populate([
-            { path: 'owner', select: 'firstName lastName phoneNumber' },
+            { path: 'owner', select: 'firstName lastName phoneNumber avatar' },
             { path: 'asset' },
-            { path: 'system' }
+            { path: 'system' },
+            { path: 'following', select: 'firstName lastName phoneNumber avatar'}
         ]);
 }
 
@@ -89,9 +105,11 @@ export const getFaults = async (req) => {
 }
 
 export const getFault = async (req) => {
-    const { faultId } = req.body;
-
-    return await Fault.findOne({faultId: faultId })
+    const { faultId, plain } = req.body;
+    if (plain) {
+        return await Fault.findOne({ _id: faultId });
+    }
+    return await Fault.findOne({ faultId: faultId })
     .populate([
         { path: 'owner', select: 'firstName lastName phoneNumber avatar' },
         { path: 'asset' },
@@ -101,6 +119,7 @@ export const getFault = async (req) => {
     ]);
     
 }
+
 
 export const getFaultsQueryParams = (query) => {
     delete query.sortBy;

@@ -9,7 +9,7 @@ router.post('/createFault', uploadFaultImage.array('images', 10), controller.cre
 router.post('/deleteFault', controller.deleteFault);
 router.post('/updateFollowingUsers', controller.updateFollowingUsers);
 router.post('/updateFaultOwner', controller.updateFaultOwner);
-router.post('/updateFaultData', controller.updateFaultData);
+router.post('/updateFaultData', uploadFaultImage.array('images', 10),controller.updateFaultData);
 router.post('/getFaults', controller.getFaults);
 router.post('/getFault', controller.getFault);
 router.post('/addFaultComment', controller.addFaultComment);

@@ -10,9 +10,9 @@ export const createAsset = async (req, res) => {
     }  
 }
 
-export const updateAssetAddress = async (req, res) => {
+export const updateAsset = async (req, res) => {
     try{
-        let data = await assetService.updateAssetAddress(req);
+        let data = await assetService.updateAsset(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);

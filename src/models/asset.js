@@ -1,29 +1,29 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const addressSchema = new Schema({
-    country: String,
-    province: String,
-    city: String,
-    street: String,
-    streetNumber: String,
-    entrance: String,
-    zipcode: String
-})
 
-const addInfoSchema = new Schema({
-    floors: Number,
-    floor: Number, 
-    unit: Number,
-    units: Number
-})
+
+
 
 const assetSchema = new Schema({
     tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
-    address: addressSchema,
+    address: {
+        country: String,
+        province: String,
+        city: String,
+        street: String,
+        streetNumber: String,
+        entrance: String,
+        zipcode: String
+    },
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     type: String,
-    addInfo: addInfoSchema,
+    addInfo: {
+        floors: Number,
+        floor: Number, 
+        unit: Number,
+        units: Number
+    },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
 
 }, {
