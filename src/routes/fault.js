@@ -11,8 +11,12 @@ router.post('/updateFollowingUsers', controller.updateFollowingUsers);
 router.post('/updateFaultOwner', controller.updateFaultOwner);
 router.post('/updateFaultData', uploadFaultImage.array('images', 10),controller.updateFaultData);
 router.post('/getFaults', controller.getFaults);
+router.post('/addFollower', controller.addFollower);
+router.post('/removeFollower', controller.removeFollower);
 router.post('/getFault', controller.getFault);
 router.post('/addFaultComment', controller.addFaultComment);
 router.post('/deleteFaultComment', controller.deleteFaultComment);
+router.post('/updateFaultComment', controller.updateFaultComment);
+router.post('/changeFaultStatus', controller.changeFaultStatus);
 
 export default router;

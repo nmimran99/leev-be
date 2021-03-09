@@ -11,7 +11,7 @@ const faultSchema = new Schema({
     system: { type: Schema.Types.ObjectId, ref: 'System'},
     following: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
-    status: Object,
+    status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     images: [],
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'}
@@ -23,7 +23,6 @@ faultSchema.pre('save', async function(next) {
     let fault = this;
     let newValue = await incrementCounter('faults');
     fault.faultId = 'FLT-' + newValue.currentValue;
-    console.log(fault)
     next();
 })
 

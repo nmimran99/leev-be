@@ -4,13 +4,20 @@ const Schema = mongoose.Schema;
 const taskSchema = new Schema({
     title: String,
     description: String,
-    assetId: Schema.Types.ObjectId,
-    systemId: Schema.Types.ObjectId,
+    asset: Schema.Types.ObjectId,
+    system: Schema.Types.ObjectId,
     owner: Schema.Types.ObjectId,
-    status: { type: Schema.Types.ObjectId, ref: 'Status'},
+    status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     createdBy: Schema.Types.ObjectId,
-    following: [{ type: Schema.Types.ObjectId, ref: 'User'}],
+    relatedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     isRepeatable: Boolean,
+    isUsingSteps: Boolean,
+    isSequential: Boolean,
+    steps: [{ 
+        order: Number,
+        title: String,
+        description: String
+    }], 
     schedule: {
         interval: String,
         year: Number,
@@ -18,7 +25,7 @@ const taskSchema = new Schema({
         day: Number,
         hour: Number,
         minutes: Number,
-        alerts: []
+        alerts: [{ type: Schema.Types.ObjectId, ref: 'Alert'}],
     },
     images: [],
     comments: []

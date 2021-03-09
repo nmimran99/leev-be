@@ -3,8 +3,8 @@ import * as controller from '../controller/status';
 
 const router = Router();
 
-router.post('/createStatusList', controller.createStatusList);
-router.post('/updateStatusList', controller.updateStatusList);
+router.post('/createStatusItem', controller.createStatusItem);
+router.post('/updateStatusItem', controller.updateStatusItem);
 router.post('/getStatusList', controller.getStatusList);
 
 
