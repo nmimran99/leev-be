@@ -12,6 +12,7 @@ import systemRoute from './routes/system';
 import statusRoute from './routes/status';
 import tenantRoute from './routes/tenant';
 import faultRoute from './routes/fault';
+import taskRoute from './routes/task';
 import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
 import Grid from 'gridfs-stream';
@@ -35,6 +36,7 @@ app.use('/systems', systemRoute);
 app.use('/statuses', statusRoute);
 app.use('/faults', faultRoute);
 app.use('/tenants', tenantRoute);
+app.use('/tasks', taskRoute);
 
 mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true });
 

@@ -3,7 +3,16 @@ const Schema = mongoose.Schema;
 
 
 const alertSchema = new Schema({
-    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'} 
+    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+    parentItem: parent._id,
+    scheduleId: '',
+    startDate: '',
+    interval: '',
+    day: null,
+    month: null,
+    time: '',
+    nextDate: '',
 }, {
     timestamps: true
 });
