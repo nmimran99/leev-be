@@ -3,6 +3,7 @@ const Schema = mongoose.Schema;
 import { incrementCounter } from '../services/counter.service';
 
 const faultSchema = new Schema({
+    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
     faultId: String,
     title: String,
     description: String,

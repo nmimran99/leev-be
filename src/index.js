@@ -1,23 +1,20 @@
+import bodyParser from 'body-parser';
+import cors from 'cors';
 import 'dotenv/config.js';
 import express from 'express';
-import cors from 'cors';
-import mongoose, { connect } from 'mongoose';
-import path from 'path';
-global.fetch = require("node-fetch");
-global.crypto = require('crypto');
-import userRoute from './routes/user';
-import authRoute from './routes/auth';
-import assetRoute from './routes/asset';
-import systemRoute from './routes/system';
-import statusRoute from './routes/status';
-import tenantRoute from './routes/tenant';
-import faultRoute from './routes/fault';
-import taskRoute from './routes/task';
-import bodyParser from 'body-parser';
 import methodOverride from 'method-override';
-import Grid from 'gridfs-stream';
-
-let gfs;
+import mongoose from 'mongoose';
+import assetRoute from './routes/asset';
+import authRoute from './routes/auth';
+import docRoute from './routes/document';
+import faultRoute from './routes/fault';
+import statusRoute from './routes/status';
+import systemRoute from './routes/system';
+import taskRoute from './routes/task';
+import tenantRoute from './routes/tenant';
+import userRoute from './routes/user';
+global.fetch = require('node-fetch');
+global.crypto = require('crypto');
 
 const app = express();
 app.use(cors());
@@ -25,9 +22,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(methodOverride('_method'));
-app.use(express.static(process.cwd() +'/public'));
-
-
+app.use(express.static(process.cwd() + '/public'));
 
 app.use('/users', userRoute);
 app.use('/auth', authRoute);
@@ -37,11 +32,13 @@ app.use('/statuses', statusRoute);
 app.use('/faults', faultRoute);
 app.use('/tenants', tenantRoute);
 app.use('/tasks', taskRoute);
+app.use('/documents', docRoute);
 
-mongoose.connect(`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`, { useNewUrlParser: true, useUnifiedTopology: true });
-
-
+mongoose.connect(
+	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`,
+	{ useNewUrlParser: true, useUnifiedTopology: true }
+);
 
 app.listen(process.env.PORT, () => {
-    console.log(`listening on ${process.env.PORT}`)
+	console.log(`listening on ${process.env.PORT}`);
 });

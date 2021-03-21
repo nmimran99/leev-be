@@ -2,6 +2,16 @@ const mongoose = require('mongoose');
 const { incrementCounter } = require('../services/counter.service');
 const Schema = mongoose.Schema;
 
+const alertSchema = new Schema({
+    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
+    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
+    startDate: Date,
+    interval: String,
+    intervalNumber: Number
+}, {
+    timestamps: true
+});
+
 const taskSchema = new Schema({
     tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
     taskId: String,
@@ -20,7 +30,7 @@ const taskSchema = new Schema({
         order: Number,
         description: String
     }], 
-    schedule: [{ type: Schema.Types.ObjectId, ref: 'Alert'}],
+    schedule: [alertSchema],
     images: [],
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment'}]
 }, {

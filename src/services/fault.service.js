@@ -6,6 +6,7 @@ import { json } from 'body-parser';
 
 export const createFault = async (req) => {
 	const {
+		tenant, 
 		title,
 		description,
 		asset,
@@ -25,6 +26,7 @@ export const createFault = async (req) => {
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
 
 	let fault = new Fault({
+		tenant,
 		title,
 		description,
 		asset,
@@ -173,9 +175,11 @@ export const getMinifiedFaults = async (req) => {
 };
 
 export const getFaults = async (req) => {
-	const { filters } = req.body;
-	let query = getFaultsQueryParams(filters);
-	const faults = await Fault.find(query).populate([
+	const { tenant, filters } = req.body;
+	
+	let addQuery = getFaultsQueryParams(filters);
+	console.log(addQuery)
+	const faults = await Fault.find({ tenant: tenant, ...addQuery}).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
 		{ path: 'asset' },
 		{ path: 'system' },
@@ -219,6 +223,12 @@ export const getFaultsQueryParams = (query) => {
 	delete query.sortBy;
 	delete query.sortOrder;
 	delete query.viewType;
+
+	Object.entries(query).forEach(entry => {
+		if (!entry[1]) {
+			delete query[entry[0]]
+		}
+	});
 
 	if (query.status) {
 		query.status = { $in: query.status };

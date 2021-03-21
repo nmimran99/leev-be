@@ -35,6 +35,7 @@ export const createTask = async (req) => {
 
 	if (req.files.length) {
 		req.files.forEach((f) => {
+			console.log(f)
 			images.push(f.filename);
 		});
 	}
@@ -102,10 +103,10 @@ export const updateTask = async (req) => {
 		steps,
 		isUsingSteps,
 		isSequntial,
-        isRepeatable,
-        uploadedImages
-    } = req.body;
-    
+		isRepeatable,
+		uploadedImages,
+	} = req.body;
+
 	let prepImages = [];
 	let images = [];
 	if (req.files.length) {
@@ -125,7 +126,7 @@ export const updateTask = async (req) => {
 		[...prepImages, ...JSON.parse(uploadedImages)],
 		'tasks',
 		_id
-    );
+	);
 
 	return await Task.findOneAndUpdate(
 		{ _id: _id },
@@ -171,8 +172,8 @@ export const deleteTask = async (req) => {
 };
 
 export const getTasks = async (req) => {
-    const { tenantId, query } = req.body;
-    const addQuery = getTasksQueryParams(query);
+	const { tenantId, query } = req.body;
+	const addQuery = getTasksQueryParams(query);
 	return Task.find({ tenant: tenantId, ...addQuery }).populate([
 		{ path: 'asset' },
 		{ path: 'system' },
@@ -300,13 +301,29 @@ export const removeRelatedUser = async (req) => {
 };
 
 export const getTasksQueryParams = (query) => {
-    if (!query) return null;
+	if (!query) return null;
 	delete query.sortBy;
 	delete query.sortOrder;
+
+	Object.entries(query).forEach(entry => {
+		if (!entry[1]) {
+			delete query[entry[0]]
+		}
+	});
 
 	if (query.status) {
 		query.status = { $in: query.status };
 	}
 
 	return query;
+};
+
+export const updateTaskSchedule = async (req) => {
+	const { taskId, schedule } = req.body;
+	console.log(req.body)
+	return await Task.findOneAndUpdate(
+		{ _id: taskId },
+		{ schedule },
+		{ new: true, useFindAndModify: false }
+	);
 };

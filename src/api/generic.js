@@ -44,3 +44,17 @@ export const removeUnlistedImages = (URLs, module, parent) => {
         }); 
     });
 }
+
+export const removeFile = async (module, parent, filename) => {
+    return new Promise((resolve, reject) => {
+        const filePath = path.join(process.env.FS_LOCAL, module, parent, filename);
+        if (!fs.existsSync(filePath)) resolve(true);
+        fs.unlink(filePath, function(err){
+            if (err)
+                console.log(err)
+        });
+        console.log(filePath, ' was removed');
+        resolve(true);
+    })
+    
+}

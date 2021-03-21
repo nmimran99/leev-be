@@ -4,7 +4,6 @@ import User from '../models/user'
 export const createAsset = async (req) => {
     const { tenantId, userId, address, owner, type, addInfo  } = req.body;
 
-    console.log(req.body)
     let asset = new Asset({
         tenant: tenantId,
         address: { ...address },

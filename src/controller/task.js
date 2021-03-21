@@ -116,3 +116,13 @@ export const removeRelatedUser = async (req, res) => {
 		return res.status(500).send(e.message);
 	}
 };
+
+export const updateTaskSchedule = async (req, res) => {
+	try {
+		let data = await taskService.updateTaskSchedule(req);
+		return res.status(200).send(data);
+	} catch (e) {
+        console.log(e.message);
+		return res.status(500).send(e.message);
+	}
+};
