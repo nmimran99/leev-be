@@ -327,3 +327,13 @@ export const updateTaskSchedule = async (req) => {
 		{ new: true, useFindAndModify: false }
 	);
 };
+
+export const getTaskOptions = async (req) => {
+	const query = req.body;
+	Object.entries(query).forEach(o => {
+		if (!o[1]) {
+			delete query[0];
+		}
+	})
+	return await Task.find({ ...query });
+}

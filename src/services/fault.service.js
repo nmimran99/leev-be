@@ -2,7 +2,7 @@ import Fault from '../models/fault';
 import Comment, { populate } from '../models/comment';
 import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Status from '../models/status';
-import { json } from 'body-parser';
+import { extractuserId } from './user.service';
 
 export const createFault = async (req) => {
 	const {
@@ -35,6 +35,7 @@ export const createFault = async (req) => {
 		following: following || [],
 		status: initStatus._id,
 		createdBy,
+		lastUpdatedBy: createdBy,
 		images,
 		comments: [],
 	});
@@ -62,9 +63,10 @@ export const deleteFault = async (req) => {
 
 export const updateFollowingUsers = async (req) => {
 	const { faultId, following } = req.body;
+	
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ following: following },
+		{ following: following, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
@@ -73,9 +75,10 @@ export const updateFollowingUsers = async (req) => {
 
 export const addFollower = async (req) => {
 	const { faultId, userId } = req.body;
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ $push: { following: userId } },
+		{ $push: { following: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
@@ -84,9 +87,10 @@ export const addFollower = async (req) => {
 
 export const removeFollower = async (req) => {
 	const { faultId, userId } = req.body;
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ $pull: { following: userId } },
+		{ $pull: { following: userId }, lastUpdatedBy: req.user._id  },
 		{ new: true }
 	).populate([
 		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
@@ -95,9 +99,10 @@ export const removeFollower = async (req) => {
 
 export const updateFaultOwner = async (req) => {
 	const { faultId, userId } = req.body;
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ owner: userId },
+		{ owner: userId, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
@@ -115,6 +120,8 @@ export const updateFaultData = async (req) => {
 		uploadedImages,
 	} = req.body;
 
+	console.log(req.user._id)
+	
 	let prepImages = [];
 	let images = [];
 	if (req.files.length) {
@@ -145,6 +152,7 @@ export const updateFaultData = async (req) => {
 			system,
 			owner,
 			images: [...prepImages, ...JSON.parse(uploadedImages)],
+			lastUpdatedBy: req.user._id
 		},
 		{ new: true }
 	).populate([
@@ -176,9 +184,8 @@ export const getMinifiedFaults = async (req) => {
 
 export const getFaults = async (req) => {
 	const { tenant, filters } = req.body;
-	
 	let addQuery = getFaultsQueryParams(filters);
-	console.log(addQuery)
+
 	const faults = await Fault.find({ tenant: tenant, ...addQuery}).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
 		{ path: 'asset' },
@@ -281,6 +288,7 @@ export const updateFaultComment = async (req) => {
 			model: 'User',
 			select: 'firstName lastName avatar',
 		},
+
 	});
 };
 
@@ -292,3 +300,14 @@ export const changeFaultStatus = async (req) => {
 		{ new: true }
 	).populate('status');
 };
+
+export const getFaultOptions = async (req) => {
+	const query = req.body;
+	Object.entries(query).forEach(o => {
+		if (!o[1]) {
+			delete query[0];
+		}
+	})
+	return await Fault.find({ ...query });
+}
+

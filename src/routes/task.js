@@ -19,6 +19,7 @@ router.post('/updateTaskComment', controller.updateTaskComment);
 router.post('/addRelatedUser', controller.addRelatedUser);
 router.post('/removeRelatedUser', controller.removeRelatedUser);
 router.post('/updateTaskSchedule', controller.updateTaskSchedule);
+router.post('/getTaskOptions', controller.getTaskOptions);
 
 
 // TODO

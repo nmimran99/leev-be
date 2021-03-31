@@ -13,6 +13,7 @@ import systemRoute from './routes/system';
 import taskRoute from './routes/task';
 import tenantRoute from './routes/tenant';
 import userRoute from './routes/user';
+import notificationRoute from './routes/notification';
 global.fetch = require('node-fetch');
 global.crypto = require('crypto');
 
@@ -24,6 +25,7 @@ app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.use(express.static(process.cwd() + '/public'));
 
+
 app.use('/users', userRoute);
 app.use('/auth', authRoute);
 app.use('/assets', assetRoute);
@@ -33,6 +35,7 @@ app.use('/faults', faultRoute);
 app.use('/tenants', tenantRoute);
 app.use('/tasks', taskRoute);
 app.use('/documents', docRoute);
+app.use('/notifications', notificationRoute);
 
 mongoose.connect(
 	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`,

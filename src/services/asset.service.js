@@ -32,8 +32,8 @@ export const updateAssetType = async(req) => {
 }
 
 export const getAssets = async (req) => {
-    const { assets } = req.body;
-    return await Asset.find( assets ? { _id: { $in: req.body.assets}} : {}).populate('owner');  
+    const { tenant, assets } = req.body;
+    return await Asset.find( assets ? { tenant: tenant, _id: { $in: req.body.assets}} : { tenant: tenant }).populate('owner');  
 }
 
 export const getAsset = async (req) => {

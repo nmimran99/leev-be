@@ -13,7 +13,6 @@ export const createDocument = async (req) => {
 		user,
 		createdBy,
 	} = req.body;
-
 	if (!req.file) return;
 
 	let file = req.file.filename;
@@ -58,8 +57,8 @@ export const deleteDocument = async (req) => {
 };
 
 export const getDocuments = async (req) => {
-    const { tenant ,query } = req.body;
-    return await Document.find({ tenant: tenant }).populate([
+    const { tenant, filters } = req.body;
+    return await Document.find({ tenant: tenant, ...filters }).populate([
 		{ path: 'asset', select: 'address' },
 		{ path: 'system', select: 'name' },
 		{ path: 'fault', select: 'faultId' },
@@ -67,4 +66,3 @@ export const getDocuments = async (req) => {
 		{ path: 'user', select: 'firstName lastName phoneNumber avatar' },
 	]);
 }
-

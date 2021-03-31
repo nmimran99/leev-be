@@ -207,6 +207,27 @@ export const authorizeSetNewPassword = async (req) => {
     });
 }
 
+export const extractuserId = async (token) => {
+    return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
+        let decodedToken;
+        try {
+            decodedToken = await jwt_decode(token);
+            if (!decodedToken) throw 'failed to decode';
+        } catch(e) {
+            return { message: 'could not decode token' }
+        };
+        if (err) {
+            if(err.message === "jwt expired") {
+                return {
+                    message: 'Password reset request time fream has expired'
+                }
+            }
+        }
+        let userId = decodedToken.id;
+        return userId;
+    });
+}
+
 
 export const getUserList = async (req) => {
     return User.find({}, '_id firstName lastName phoneNumber avatar');
@@ -220,3 +241,4 @@ export const getUsersData = async (req) => {
 export const getUserDataById = async (req) => { 
     return await User.findById(req.body.userId , '_id firstName lastName phoneNumber avatar');
 }
+

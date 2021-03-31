@@ -119,5 +119,14 @@ export const changeFaultStatus = async (req, res) => {
     }  
 }
 
+export const getFaultOptions = async (req, res) => {
+    try{
+        let data = await faultService.getFaultOptions(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
 
 
