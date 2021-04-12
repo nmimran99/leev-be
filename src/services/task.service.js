@@ -172,9 +172,10 @@ export const deleteTask = async (req) => {
 };
 
 export const getTasks = async (req) => {
-	const { tenantId, query } = req.body;
-	const addQuery = getTasksQueryParams(query);
-	return Task.find({ tenant: tenantId, ...addQuery }).populate([
+	const { tenant } = req.user;
+	const { filters } = req.body;
+	const addQuery = getTasksQueryParams(filters);
+	return Task.find({ tenant: tenant, ...addQuery }).populate([
 		{ path: 'asset' },
 		{ path: 'system' },
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },

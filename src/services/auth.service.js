@@ -4,7 +4,8 @@ import bcrypt from 'bcryptjs';
 import randtoken from 'rand-token'
 
 export const authenticate = async (req) => {
-    const user = await User.findOne({ username: req.body.username });
+    const user = await User.findOne({ email: req.body.email });
+    console.log(req.body.email)
     if (!user) return; 
 
     const isPassValid = await bcrypt.compare(req.body.password, user.password);
@@ -13,8 +14,8 @@ export const authenticate = async (req) => {
     
     return {
         user: {
+            tenant: user.tenant,
             _id: user._id,
-            username: user.username,
             email: user.email,
             firstname: user.firstName,
             lastname: user.lastName

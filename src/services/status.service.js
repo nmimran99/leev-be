@@ -5,6 +5,18 @@ export const getStatusList = async (req) => {
     return await StatusList.find({ module: module });
 }
 
+export const getStatusIds = async (module, state) => {
+    let filters = { module };
+    let statusList= [];
+    if (state) {
+        filters.state = state;
+    }
+    let statuses = await StatusList.find(filters, '_id');
+    statuses.forEach(s => statusList.push(s._id));
+    return statusList;
+
+}
+
 export const updateStatusItem = async (req) => {
     const { _id, statusId, state, order } = req.body;
     return await StatusList.findOneAndUpdate({ _id: _id}, { statusId, state, order }, { new: true})
@@ -15,7 +27,7 @@ export const createStatusItem = async (req) => {
     const stList = new StatusList({
         module,
         statusId,
-        statusId,
+        state,
         order
     });
 

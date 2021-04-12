@@ -1,19 +1,29 @@
 import Asset from '../models/asset';
 import User from '../models/user'
+import { geoCode } from './geocoder.service';
 
 export const createAsset = async (req) => {
-    const { tenantId, userId, address, owner, type, addInfo  } = req.body;
-
+    const { tenant, userId, address, owner, type, addInfo  } = req.body;
+    console.log(req.body)
+    const coordinates = await geoCode(getAddress(address))
     let asset = new Asset({
-        tenant: tenantId,
+        tenant: tenant,
         address: { ...address },
         owner,
         type,
         addInfo,
         createdBy: userId,
+        coordinates
     })
 
     return await asset.save();
+}
+
+export const getAddress = (address) => {
+    return {
+        address: `${address.street} ${address.streetNumber}${address.entrance || ''}, ${address.city}`,
+        country: address.country
+    }
 }
 
 export const updateAsset = async(req) => {
@@ -32,7 +42,8 @@ export const updateAssetType = async(req) => {
 }
 
 export const getAssets = async (req) => {
-    const { tenant, assets } = req.body;
+    const { tenant } = req.user;
+    const { assets } = req.body;
     return await Asset.find( assets ? { tenant: tenant, _id: { $in: req.body.assets}} : { tenant: tenant }).populate('owner');  
 }
 

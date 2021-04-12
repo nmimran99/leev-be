@@ -58,3 +58,16 @@ export const removeFile = async (module, parent, filename) => {
     })
     
 }
+
+export const removeDuplicateObjectIds = inputArray => {
+    const sortedArray = inputArray.sort((a,b) => (a.toString() > b.toString() ? 1 : (a.toString() < b.toString() ? -1 : 0)));
+
+    let lastSeen = undefined;
+    return sortedArray.reduce((sum, element) => {
+       if(lastSeen !== element.toString()){
+           sum.push(element);
+       }
+       lastSeen = element.toString();
+       return sum;
+    }, []);
+};

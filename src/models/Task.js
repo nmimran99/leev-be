@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const { incrementCounter } = require('../services/counter.service');
+const { createNotification } = require('../services/notification.service');
 const Schema = mongoose.Schema;
 
 const alertSchema = new Schema({
@@ -44,5 +45,11 @@ taskSchema.pre('save', async function(next) {
     next();
 })
 
-module.exports = mongoose.model('Task', taskSchema);
+const Task = mongoose.model('Task', taskSchema);
+Task.watch([], { fullDocument: 'updateLookup' })
+.on('change', (data) => {
+    createNotification(data);
+})
+module.exports = Task;
+
 

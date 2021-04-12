@@ -25,7 +25,7 @@ const assetSchema = new Schema({
         units: Number
     },
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
-
+    coordinates: {}
 }, {
     timestamps: true
 });

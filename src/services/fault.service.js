@@ -1,5 +1,7 @@
 import Fault from '../models/fault';
 import Comment, { populate } from '../models/comment';
+import Asset from '../models/asset';
+import System from '../models/system';
 import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Status from '../models/status';
 import { extractuserId } from './user.service';
@@ -24,7 +26,14 @@ export const createFault = async (req) => {
 	}
 
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
+	let assetData = await Asset.findOne({ _id: asset}, 'owner');
+	let systemData = await System.findOne({ _id: system}, 'owner');
 
+	let followingArr = [];
+	if (assetData) followingArr.push(assetData.owner);
+	if (systemData) followingArr.push(systemData.owner);
+	followingArr = followingArr.filter(v => v.toString() !== owner )
+	
 	let fault = new Fault({
 		tenant,
 		title,
@@ -32,7 +41,7 @@ export const createFault = async (req) => {
 		asset,
 		system,
 		owner,
-		following: following || [],
+		following: following || followingArr,
 		status: initStatus._id,
 		createdBy,
 		lastUpdatedBy: createdBy,
@@ -99,10 +108,16 @@ export const removeFollower = async (req) => {
 
 export const updateFaultOwner = async (req) => {
 	const { faultId, userId } = req.body;
+	const fault = await Fault.findOne({ _id: faultId });
+	let following = fault.following;
+	if (following.includes(userId)) {
+		following = following.filter(f => f != userId )
+	};
+	following.push(fault.owner);
 
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ owner: userId, lastUpdatedBy: req.user._id },
+		{ owner: userId, following, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
@@ -183,7 +198,8 @@ export const getMinifiedFaults = async (req) => {
 };
 
 export const getFaults = async (req) => {
-	const { tenant, filters } = req.body;
+	const { tenant } = req.user;
+	const { filters } = req.body;
 	let addQuery = getFaultsQueryParams(filters);
 
 	const faults = await Fault.find({ tenant: tenant, ...addQuery}).populate([

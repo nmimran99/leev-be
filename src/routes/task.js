@@ -1,25 +1,26 @@
 import { Router } from 'express';
 import * as controller from '../controller/task';
 import { uploadTaskImage } from '../services/multer.service';
+import * as authService from '../middleware/authenticate';
 
 
 
 const router = Router();
 
-router.post('/createTask', uploadTaskImage.array('images', 10) ,controller.createTask);
-router.post('/deleteTask', controller.deleteTask);
-router.post('/getTasks', controller.getTasks);
-router.post('/getTask', controller.getTask);
-router.post('/updateTask', uploadTaskImage.array('images', 10), controller.updateTask);
-router.post('/updateTaskOwner', controller.updateTaskOwner);
-router.post('/updateTaskStatus', controller.updateTaskStatus);
-router.post('/addTaskComment', controller.addTaskComment);
-router.post('/deleteTaskComment', controller.deleteTaskComment);
-router.post('/updateTaskComment', controller.updateTaskComment);
-router.post('/addRelatedUser', controller.addRelatedUser);
-router.post('/removeRelatedUser', controller.removeRelatedUser);
-router.post('/updateTaskSchedule', controller.updateTaskSchedule);
-router.post('/getTaskOptions', controller.getTaskOptions);
+router.post('/createTask', authService.authenticate, uploadTaskImage.array('images', 10) ,controller.createTask);
+router.post('/deleteTask', authService.authenticate, controller.deleteTask);
+router.post('/getTasks', authService.authenticate, controller.getTasks);
+router.post('/getTask', authService.authenticate, controller.getTask);
+router.post('/updateTask', authService.authenticate, uploadTaskImage.array('images', 10), controller.updateTask);
+router.post('/updateTaskOwner', authService.authenticate, controller.updateTaskOwner);
+router.post('/updateTaskStatus', authService.authenticate, controller.updateTaskStatus);
+router.post('/addTaskComment', authService.authenticate, controller.addTaskComment);
+router.post('/deleteTaskComment', authService.authenticate, controller.deleteTaskComment);
+router.post('/updateTaskComment', authService.authenticate, controller.updateTaskComment);
+router.post('/addRelatedUser', authService.authenticate, controller.addRelatedUser);
+router.post('/removeRelatedUser', authService.authenticate, controller.removeRelatedUser);
+router.post('/updateTaskSchedule', authService.authenticate, controller.updateTaskSchedule);
+router.post('/getTaskOptions', authService.authenticate, controller.getTaskOptions);
 
 
 // TODO
