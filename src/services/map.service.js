@@ -1,31 +1,38 @@
-import { getStatusIds } from './status.service';
+import { getStatusIds, getStatusList } from './status.service';
 import { getAssets } from './asset.service';
 import { getFaults } from './fault.service';
 import { getTasks } from './task.service';
 
 export const getMapData = async (req) => {
-    let assets = await getAssets(req);
-    
-	req.body.filters = getMapFilters(req, 'faults');
-    const faults = await getFaults(req);
+	try {
+		const faults = await getMapFaults(req);
+		const tasks = await getMapTasks(req);
+		const assets = await getMapAssets(req);
 
-	req.body.filters = getMapFilters(req, 'tasks');
-    const tasks = await getTasks(req);
-    
-	return {
-		assets,
-		faults,
-		tasks,
-	};
+		return {
+			assets,
+			faults,
+			tasks,
+		};
+	} catch(e) {
+		console.log(e.message);
+		return null;
+	}
 };
 
-export const getMapFilters = async (req, module) => {
-    if (!req.body.filters) return;
-    let { filters } = req.body;
-    
-    if (filters[module]) {
-		filters.status =
-			filters[module].status || (await getStatusIds('faults', 'open'));
-    }
-    return filters;
-}
+export const getMapAssets = async (req) => { 
+	let { filters } = req.body
+	if (filters.asset) {
+		filters._id = filters.asset;
+		delete filters.asset;
+	}
+	return await getAssets(req);
+} 
+
+export const getMapFaults = async (req) => {
+	return await getFaults(req);
+}  
+
+export const getMapTasks = async (req) => { 
+	return await getTasks(req);
+} 

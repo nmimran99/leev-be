@@ -1,21 +1,22 @@
 import { relocateFile, removeFile, removeUnlistedImages } from '../api/generic';
 import Document from '../models/document';
 import path from 'path';
+import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
 
 export const createDocument = async (req) => {
+	const { tenant, _id: createdBy } = req.user;
 	const {
-		tenant,
 		description,
 		asset,
 		system,
 		fault,
 		task,
-		user,
-		createdBy,
+		user
 	} = req.body;
 	if (!req.file) return;
 
 	let file = req.file.filename;
+
 	let newURL = await relocateFile(file, tenant, 'documents');
 
 	const doc = new Document({
@@ -36,13 +37,20 @@ export const createDocument = async (req) => {
 
 export const getDocument = async (req) => {
 	const { documentId } = req.body;
-	return await Document.findOne({ _id: documentId }).populate([
-		{ path: 'asset', select: 'address' },
-		{ path: 'system', select: 'name' },
-		{ path: 'fault', select: 'faultId' },
-		{ path: 'task', select: 'taskId' },
-		{ path: 'user', select: 'firstName lastName phoneNumber avatar' },
-	]);
+
+	const isRelated = await isUserRelated(
+		'documents',
+		Document,
+		documentId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
+	return await Document.findOne({ _id: documentId });
 };
 
 export const deleteDocument = async (req) => {
@@ -57,8 +65,16 @@ export const deleteDocument = async (req) => {
 };
 
 export const getDocuments = async (req) => {
-    const { tenant, filters } = req.body;
-    return await Document.find({ tenant: tenant, ...filters }).populate([
+	const { tenant, _id: userId } = req.user;
+	const { filters } = req.body;
+	const { permLevel } = req.headers;
+
+	let addQuery = {
+		...getDocmentsQueryParams(filters),
+		...getRelatedQuery(permLevel, userId),
+	};
+
+    return await Document.find({ tenant: tenant, ...addQuery }).populate([
 		{ path: 'asset', select: 'address' },
 		{ path: 'system', select: 'name' },
 		{ path: 'fault', select: 'faultId' },
@@ -66,3 +82,42 @@ export const getDocuments = async (req) => {
 		{ path: 'user', select: 'firstName lastName phoneNumber avatar' },
 	]);
 }
+
+export const updateDocumentDetails = async (req) => {
+	const { tenant, _id: userId } = req.user;
+	const { documentId, details } = req.body;
+
+	const isRelated = await isUserRelated(
+		'documents',
+		Document,
+		documentId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+	console.log(details)
+	const updated = getDocmentsQueryParams(details);
+	return await Document.findOneAndUpdate({ _id: details._id }, { ...updated }, { new: true, useFindAndModify: false}).populate([
+		{ path: 'asset', select: 'address' },
+		{ path: 'system', select: 'name' },
+		{ path: 'fault', select: 'faultId' },
+		{ path: 'task', select: 'taskId' },
+		{ path: 'user', select: 'firstName lastName phoneNumber avatar' },
+	]);
+}
+
+export const getDocmentsQueryParams = (query) => {
+
+	Object.entries(query).forEach((entry) => {
+		if (!entry[1]) {
+			delete query[entry[0]];
+		} else if (Array.isArray(entry[1])) {
+			query[entry[0]] = { $in: entry[1]};
+		}
+	});
+
+	return query;
+};

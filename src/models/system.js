@@ -8,7 +8,7 @@ const systemSchema = new Schema({
     name: String,
     asset: { type: Schema.Types.ObjectId, ref: 'Asset'},
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
-    linkedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
+    relatedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     data: {
         general: {
             location: String,

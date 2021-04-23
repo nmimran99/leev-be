@@ -4,6 +4,9 @@ import * as faultService from '../services/fault.service';
 export const createFault = async (req, res) => {
     try{
         let data = await faultService.createFault(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -14,15 +17,21 @@ export const createFault = async (req, res) => {
 export const deleteFault = async (req, res) => {
     try{
         let data = await faultService.deleteFault(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const updateFollowingUsers = async (req, res) => {
+export const updateRelatedUsers = async (req, res) => {
     try{
-        let data = await faultService.updateFollowingUsers(req);
+        let data = await faultService.updateRelatedUsers(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -32,24 +41,34 @@ export const updateFollowingUsers = async (req, res) => {
 export const updateFaultOwner = async (req, res) => {
     try{
         let data = await faultService.updateFaultOwner(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
     }  
 }
 
-export const addFollower = async (req, res) => {
+export const addRelatedUser = async (req, res) => {
     try{
-        let data = await faultService.addFollower(req);
+        let data = await faultService.addRelatedUser(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
+        console.log(e.message)
         return res.status(500).send(e.message);
     }  
 }
 
-export const removeFollower = async (req, res) => {
+export const removeRelatedUser = async (req, res) => {
     try{
-        let data = await faultService.removeFollower(req);
+        let data = await faultService.removeRelatedUser(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -59,6 +78,9 @@ export const removeFollower = async (req, res) => {
 export const updateFaultData = async (req, res) => {
     try{
         let data = await faultService.updateFaultData(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         console.log(e.message)
@@ -69,8 +91,12 @@ export const updateFaultData = async (req, res) => {
 export const getFaults = async (req, res) => {
     try{
         let data = await faultService.getFaults(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
+        console.log(e.message)
         return res.status(500).send(e.message);
     }  
 }
@@ -78,6 +104,9 @@ export const getFaults = async (req, res) => {
 export const getFault = async (req, res) => {
     try{
         let data = await faultService.getFault(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -87,6 +116,9 @@ export const getFault = async (req, res) => {
 export const addFaultComment = async (req, res) => {
     try{
         let data = await faultService.addFaultComment(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -95,6 +127,9 @@ export const addFaultComment = async (req, res) => {
 export const deleteFaultComment = async (req, res) => {
     try{
         let data = await faultService.deleteFaultComment(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -104,6 +139,9 @@ export const deleteFaultComment = async (req, res) => {
 export const updateFaultComment = async (req, res) => {
     try{
         let data = await faultService.updateFaultComment(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -113,6 +151,9 @@ export const updateFaultComment = async (req, res) => {
 export const changeFaultStatus = async (req, res) => {
     try{
         let data = await faultService.changeFaultStatus(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -122,6 +163,9 @@ export const changeFaultStatus = async (req, res) => {
 export const getFaultOptions = async (req, res) => {
     try{
         let data = await faultService.getFaultOptions(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);

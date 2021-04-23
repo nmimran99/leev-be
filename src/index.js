@@ -14,6 +14,7 @@ import taskRoute from './routes/task';
 import tenantRoute from './routes/tenant';
 import userRoute from './routes/user';
 import mapRoute from './routes/map';
+import roleRoute from './routes/role';
 import notificationRoute from './routes/notification';
 global.fetch = require('node-fetch');
 global.crypto = require('crypto');
@@ -38,6 +39,7 @@ app.use('/tasks', taskRoute);
 app.use('/documents', docRoute);
 app.use('/notifications', notificationRoute);
 app.use('/map', mapRoute);
+app.use('/roles', roleRoute);
 
 mongoose.connect(
 	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`,

@@ -20,7 +20,8 @@ const userSchema = new Schema({
     birthDate: Date,
     createdBy: String,
     avatar: String,
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    role: { type: Schema.Types.ObjectId, ref: 'Role'}
 }, {
     timestamps: true
 });

@@ -11,7 +11,7 @@ const faultSchema = new Schema({
     location: String,
     asset: { type: Schema.Types.ObjectId, ref: 'Asset'},
     system: { type: Schema.Types.ObjectId, ref: 'System'},
-    following: [{ type: Schema.Types.ObjectId, ref: 'User'}],
+    relatedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     images: [],

@@ -1,24 +1,25 @@
 import { Router } from 'express';
 import * as controller from '../controller/fault';
 import { uploadFaultImage } from '../services/multer.service';
-import * as authService from '../middleware/authenticate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 
 
 const router = Router();
 
-router.post('/createFault', authService.authenticate, uploadFaultImage.array('images', 10), controller.createFault);
-router.post('/deleteFault', authService.authenticate, controller.deleteFault);
-router.post('/updateFollowingUsers', authService.authenticate, controller.updateFollowingUsers);
-router.post('/updateFaultOwner', authService.authenticate, controller.updateFaultOwner);
-router.post('/updateFaultData', authService.authenticate, uploadFaultImage.array('images', 10),controller.updateFaultData);
-router.post('/getFaults', authService.authenticate, controller.getFaults);
-router.post('/addFollower', authService.authenticate, controller.addFollower);
-router.post('/removeFollower', authService.authenticate, controller.removeFollower);
-router.post('/getFault', authService.authenticate, controller.getFault);
-router.post('/addFaultComment', authService.authenticate, controller.addFaultComment);
-router.post('/deleteFaultComment', authService.authenticate, controller.deleteFaultComment);
-router.post('/updateFaultComment', authService.authenticate, controller.updateFaultComment);
-router.post('/changeFaultStatus', authService.authenticate, controller.changeFaultStatus);
-router.post('/getFaultOptions', authService.authenticate, controller.getFaultOptions);
+router.post('/createFault', authenticate, authorize, uploadFaultImage.array('images', 10), controller.createFault);
+router.post('/deleteFault', authenticate, authorize, controller.deleteFault);
+router.post('/updateRelatedUsers', authenticate, authorize, controller.updateRelatedUsers);
+router.post('/updateFaultOwner', authenticate, authorize, controller.updateFaultOwner);
+router.post('/updateFaultData', authenticate, authorize, uploadFaultImage.array('images', 10),controller.updateFaultData);
+router.post('/getFaults', authenticate, authorize, controller.getFaults);
+router.post('/addRelatedUser', authenticate, authorize, controller.addRelatedUser);
+router.post('/removeRelatedUser', authenticate, authorize, controller.removeRelatedUser);
+router.post('/getFault', authenticate, authorize, controller.getFault);
+router.post('/addFaultComment', authenticate, authorize, controller.addFaultComment);
+router.post('/deleteFaultComment', authenticate, authorize, controller.deleteFaultComment);
+router.post('/updateFaultComment', authenticate, authorize, controller.updateFaultComment);
+router.post('/changeFaultStatus', authenticate, authorize, controller.changeFaultStatus);
+router.post('/getFaultOptions', authenticate, authorize, controller.getFaultOptions);
 
 export default router;

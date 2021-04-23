@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import * as controller from '../controller/map';
-import * as authService from '../middleware/authenticate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 
 
 const router = Router();
 
-router.post('/getMapData', authService.authenticate, controller.getMapData);
+router.post('/getMapData', authenticate, authorize, controller.getMapData);
 
 export default router; 

@@ -28,7 +28,8 @@ export const registerUser = async (req) => {
         phoneNumber: req.body.phoneNumber,
         birthDate: req.body.birthDate,
         createdBy: req.body.createdBy,
-        avatar: req.file.filename
+        avatar: req.file.filename,
+        role: req.body.role
     });
 
     let savedUser = await user.save();
@@ -37,6 +38,12 @@ export const registerUser = async (req) => {
     return await savedUser.save();
 
 };
+
+export const updateUserRole = async (req) => {
+    const { _id: lastUpdatedBy } = req.user;
+    const { user, role } = req.body;
+    return await User.findOneAndUpdate({ _id: user}, { role, lastUpdatedBy }, { useFindAndModify: false, new: true})
+}
 
 export const uploadAvatar = async (req) => {
     const { userId } = req.body;
@@ -116,7 +123,7 @@ export const reloginUser = async (req) => {
     } catch(e) {
         return { auth: false, message: "could not decode token", user: null, token: null}
     };
-    const user = await User.findOne({ _id: decodedToken.id }, '_id username firstName lastName email avatar tenant');
+    const user = await User.findOne({ _id: decodedToken.id }, '_id username firstName lastName email avatar tenant role').populate('role');
     return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
         if (!user) return { auth: false, message: 'user token not linked to a user', user: null, token: null};
         if (err) {
@@ -230,15 +237,15 @@ export const extractuserId = async (token) => {
 
 
 export const getUserList = async (req) => {
-    return User.find({}, '_id firstName lastName phoneNumber avatar');
+    return User.find({}, '_id firstName lastName phoneNumber avatar role').populate('role');
 }
 
 export const getUsersData = async (req) => { 
     const { userList } = req.body;
-    return await User.find({ _id: { $in: userList}}, '_id firstName lastName phoneNumber avatar');
+    return await User.find({ _id: { $in: userList}}, '_id firstName lastName phoneNumber avatar role').populate('role');
 }
 
 export const getUserDataById = async (req) => { 
-    return await User.findById(req.body.userId , '_id firstName lastName phoneNumber avatar');
+    return await User.findById(req.body.userId , '_id firstName lastName phoneNumber avatar role').populate('role');
 }
 

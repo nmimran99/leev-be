@@ -18,10 +18,10 @@ export const authenticate = async (req, res, next) => {
         };
         if (err) {
             if(err.message === "jwt expired") {
-                return res.status(304).send({ auth: false, message: "Failed to Authenticate" });
+                return res.status(401).send({ auth: false, message: "Failed to Authenticate" });
             }
         }
-        req.user = await User.findOne({ _id: decodedToken.id });
+        req.user = await User.findOne({ _id: decodedToken.id }).populate('role');
         next();
     });
 }

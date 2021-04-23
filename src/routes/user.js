@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../controller/user';
 import { uploadAvatar } from '../services/multer.service';
+import * as authService from '../middleware/authenticate';
 
 
 const router = Router();
@@ -19,6 +20,7 @@ router.post('/authorizeSetNewPassword', controller.authorizeSetNewPassword);
 router.get('/getUserList', controller.getUserList);
 router.post('/getUsersData', controller.getUsersData);
 router.post('/getUserDataById', controller.getUserDataById);
+router.post('/updateUserRole', authService.authenticate, controller.updateUserRole);
 
 
 // TODO

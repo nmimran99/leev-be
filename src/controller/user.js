@@ -22,6 +22,15 @@ export const uploadAvatar = async (req, res) => {
     }  
 }
 
+export const updateUserRole = async (req, res) => {
+    try{
+        let data = await userService.updateUserRole(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
 export const removeAvatar = async (req, res) => {
     try{
         let data = await userService.removeAvatar(req);

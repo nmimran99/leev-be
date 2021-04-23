@@ -20,7 +20,6 @@ export const createNotification = async (data) => {
 				data.updateDescription.updatedFields.comment = entry[1];
 				createCommentNotification(data);
 			} else if (
-				key.includes('following') ||
 				key.includes('relatedUsers')
 			) {
 				data.updateDescription.updatedFields.relatedUser = entry[1];
@@ -107,7 +106,7 @@ export const getDistributionList = (data, type, actionBy) => {
 		} else {
 			let dist = [];
 			const relatedUsers =
-				data.fullDocument.relatedUsers || data.fullDocument.following;
+				data.fullDocument.relatedUsers;
 			relatedUsers.forEach((r) => {
 				if (r.equals(actionBy)) {
 					return;
@@ -117,6 +116,11 @@ export const getDistributionList = (data, type, actionBy) => {
 			if (!actionBy.equals(data.fullDocument.owner)) {
 				dist.push(data.fullDocument.owner);
 			}
+
+			// if (data.fullDocument.system) {
+			// 	const system = await System.findOne({ _id: data.fullDocument.system });
+			// 	dist.push(system.relatedUsers);
+			// }
 			resolve(removeDuplicateObjectIds(dist));
 		}
 	});
@@ -145,6 +149,7 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 
 	return await Promise.all(
 		distributionList.map(async (distUser) => {
+		
 			let n = new Notification({ ...notification, user: distUser });
 			try {
 				await n.save();

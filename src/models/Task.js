@@ -33,7 +33,8 @@ const taskSchema = new Schema({
     }], 
     schedule: [alertSchema],
     images: [],
-    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment'}]
+    comments: [{ type: Schema.Types.ObjectId, ref: 'Comment'}],
+    lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' } 
 }, {
     timestamps: true
 });

@@ -2,19 +2,46 @@ import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Task from '../models/task';
 import Status from '../models/status';
 import Comment from '../models/comment';
+import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
+import { getUnauthorizedMessage } from '../api/generic';
 
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	if (plain) {
 		return await Task.findOne({ _id: taskId }).populate('status');
 	}
 	return await Task.findOne({ taskId: taskId }).populate([
 		{ path: 'asset' },
 		{ path: 'system' },
-		{ path: 'owner', select: 'firstName lastName avatar phoneNumber' },
+		{
+			path: 'owner',
+			select: 'firstName lastName avatar phoneNumber role',
+			populate: {
+				path: 'role',
+				model: 'Role',
+				select: 'roleName',
+			},
+		},
 		{
 			path: 'relatedUsers',
-			select: 'firstName lastName avatar phoneNumber',
+			select: 'firstName lastName avatar phoneNumber, role',
+			populate: {
+				path: 'role',
+				model: 'Role',
+				select: 'roleName',
+			},
 		},
 		{ path: 'status' },
 		{
@@ -29,13 +56,11 @@ export const getTask = async (req) => {
 };
 
 export const createTask = async (req) => {
-	console.log(req.body);
-
 	let images = [];
 
 	if (req.files.length) {
 		req.files.forEach((f) => {
-			console.log(f)
+			console.log(f);
 			images.push(f.filename);
 		});
 	}
@@ -107,6 +132,17 @@ export const updateTask = async (req) => {
 		uploadedImages,
 	} = req.body;
 
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		_id,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	let prepImages = [];
 	let images = [];
 	if (req.files.length) {
@@ -141,15 +177,21 @@ export const updateTask = async (req) => {
 			isSequntial,
 			isRepeatable,
 			images: [...prepImages, ...JSON.parse(uploadedImages)],
+			lastUpdatedBy: req.user._id
 		},
 		{ new: true }
 	).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 		{ path: 'asset' },
 		{ path: 'system' },
 		{
 			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber avatar',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
 		},
 		{ path: 'status' },
 		{
@@ -172,9 +214,14 @@ export const deleteTask = async (req) => {
 };
 
 export const getTasks = async (req) => {
-	const { tenant } = req.user;
+	const { tenant, _id: userId } = req.user;
 	const { filters } = req.body;
-	const addQuery = getTasksQueryParams(filters);
+	const { permLevel } = req.headers;
+
+	const addQuery = {
+		...getTasksQueryParams(filters),
+		...getRelatedQuery(permLevel, userId),
+	};
 	return Task.find({ tenant: tenant, ...addQuery }).populate([
 		{ path: 'asset' },
 		{ path: 'system' },
@@ -185,24 +232,60 @@ export const getTasks = async (req) => {
 
 export const updateTaskOwner = async (req) => {
 	const { taskId, owner } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ owner },
+		{ owner, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate('owner');
 };
 
 export const updateTaskStatus = async (req) => {
 	const { taskId, status } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ status },
+		{ status, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate('status');
 };
 
 export const addTaskComment = async (req) => {
 	const { taskId, userId, text } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	const comment = new Comment({
 		parentObject: taskId,
 		user: userId,
@@ -216,6 +299,7 @@ export const addTaskComment = async (req) => {
 			$push: {
 				comments: comm,
 			},
+			lastUpdatedBy: req.user._id
 		},
 		{
 			new: true,
@@ -234,6 +318,18 @@ export const addTaskComment = async (req) => {
 
 export const updateTaskComment = async (req) => {
 	const { taskId, commentId, text } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	await Comment.findOneAndUpdate({ _id: commentId }, { text }, { new: true });
 	return Task.findOne({ _id: taskId }).populate({
 		path: 'comments',
@@ -247,6 +343,17 @@ export const updateTaskComment = async (req) => {
 
 export const deleteTaskComment = async (req) => {
 	const { taskId, commentId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
 
 	const task = await Task.findOneAndUpdate(
 		{ _id: taskId },
@@ -271,9 +378,21 @@ export const deleteTaskComment = async (req) => {
 
 export const addRelatedUser = async (req) => {
 	const { taskId, userId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ $push: { relatedUsers: userId } },
+		{ $push: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate({
 		path: 'relatedUsers',
@@ -287,9 +406,21 @@ export const addRelatedUser = async (req) => {
 
 export const removeRelatedUser = async (req) => {
 	const { taskId, userId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ $pull: { relatedUsers: userId } },
+		{ $pull: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate({
 		path: 'relatedUsers',
@@ -306,9 +437,9 @@ export const getTasksQueryParams = (query) => {
 	delete query.sortBy;
 	delete query.sortOrder;
 
-	Object.entries(query).forEach(entry => {
+	Object.entries(query).forEach((entry) => {
 		if (!entry[1]) {
-			delete query[entry[0]]
+			delete query[entry[0]];
 		}
 	});
 
@@ -321,20 +452,31 @@ export const getTasksQueryParams = (query) => {
 
 export const updateTaskSchedule = async (req) => {
 	const { taskId, schedule } = req.body;
-	console.log(req.body)
+
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ schedule },
+		{ schedule, lastUpdatedBy: req.user._id },
 		{ new: true, useFindAndModify: false }
 	);
 };
 
 export const getTaskOptions = async (req) => {
 	const query = req.body;
-	Object.entries(query).forEach(o => {
+	Object.entries(query).forEach((o) => {
 		if (!o[1]) {
 			delete query[0];
 		}
-	})
+	});
 	return await Task.find({ ...query });
-}
+};

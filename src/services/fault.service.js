@@ -4,17 +4,20 @@ import Asset from '../models/asset';
 import System from '../models/system';
 import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Status from '../models/status';
-import { extractuserId } from './user.service';
+import { isUserRelated, getRelatedQuery } from '../middleware/authorize';
+
+// function without permission checking are functions that are allowing only item.read === 2;
+// only permLevel that is being checked is 1.
 
 export const createFault = async (req) => {
 	const {
-		tenant, 
+		tenant,
 		title,
 		description,
 		asset,
 		system,
 		owner,
-		following,
+		relatedUsers,
 		createdBy,
 	} = req.body;
 	let images = [];
@@ -26,14 +29,14 @@ export const createFault = async (req) => {
 	}
 
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
-	let assetData = await Asset.findOne({ _id: asset}, 'owner');
-	let systemData = await System.findOne({ _id: system}, 'owner');
+	let assetData = await Asset.findOne({ _id: asset }, 'owner');
+	let systemData = await System.findOne({ _id: system }, 'owner');
 
-	let followingArr = [];
-	if (assetData) followingArr.push(assetData.owner);
-	if (systemData) followingArr.push(systemData.owner);
-	followingArr = followingArr.filter(v => v.toString() !== owner )
-	
+	let relatedUsersArr = [];
+	if (assetData) relatedUsersArr.push(assetData.owner);
+	if (systemData) relatedUsersArr.push(systemData.owner);
+	relatedUsersArr = relatedUsersArr.filter((v) => v.toString() !== owner);
+
 	let fault = new Fault({
 		tenant,
 		title,
@@ -41,7 +44,7 @@ export const createFault = async (req) => {
 		asset,
 		system,
 		owner,
-		following: following || followingArr,
+		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
 		createdBy,
 		lastUpdatedBy: createdBy,
@@ -67,60 +70,122 @@ export const createFault = async (req) => {
 
 export const deleteFault = async (req) => {
 	const { faultId } = req.body;
+
 	return await Fault.findOneAndDelete({ _id: faultId });
 };
 
-export const updateFollowingUsers = async (req) => {
-	const { faultId, following } = req.body;
-	
+export const updateRelatedUsers = async (req) => {
+	const { faultId, relatedUsers } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ following: following, lastUpdatedBy: req.user._id },
+		{ relatedUsers: relatedUsers, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 	]);
 };
 
-export const addFollower = async (req) => {
+export const addRelatedUser = async (req) => {
 	const { faultId, userId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
 
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ $push: { following: userId }, lastUpdatedBy: req.user._id },
+		{ $push: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 	]);
 };
 
-export const removeFollower = async (req) => {
+export const removeRelatedUser = async (req) => {
 	const { faultId, userId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
 
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ $pull: { following: userId }, lastUpdatedBy: req.user._id  },
+		{ $pull: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 	]);
 };
 
 export const updateFaultOwner = async (req) => {
 	const { faultId, userId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	const fault = await Fault.findOne({ _id: faultId });
-	let following = fault.following;
-	if (following.includes(userId)) {
-		following = following.filter(f => f != userId )
-	};
-	following.push(fault.owner);
+	let relatedUsers = fault.relatedUsers;
+	if (relatedUsers.includes(userId)) {
+		relatedUsers = relatedUsers.filter((f) => f != userId);
+	}
+	relatedUsers.push(fault.owner);
 
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ owner: userId, following, lastUpdatedBy: req.user._id },
+		{ owner: userId, relatedUsers, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 	]);
 };
 
@@ -135,8 +200,17 @@ export const updateFaultData = async (req) => {
 		uploadedImages,
 	} = req.body;
 
-	console.log(req.user._id)
-	
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		_id,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	let prepImages = [];
 	let images = [];
 	if (req.files.length) {
@@ -167,14 +241,22 @@ export const updateFaultData = async (req) => {
 			system,
 			owner,
 			images: [...prepImages, ...JSON.parse(uploadedImages)],
-			lastUpdatedBy: req.user._id
+			lastUpdatedBy: req.user._id,
 		},
 		{ new: true }
 	).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 		{ path: 'asset' },
 		{ path: 'system' },
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 		{ path: 'status' },
 		{
 			path: 'comments',
@@ -188,26 +270,54 @@ export const updateFaultData = async (req) => {
 };
 
 export const getMinifiedFaults = async (req) => {
+	const { permLevel } = req.headers;
 	const { filters } = req.body;
-	let query = getFaultsQueryParams(filters);
+	const user = req.user;
+
+	let query = {
+		...getFaultsQueryParams(filters),
+		...getRelatedQuery(permLevel, user._id),
+	};
+	console.log(addQuery);
 	const faults = await Fault.find(query).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 		{ path: 'asset' },
 	]);
 	return Promise.resolve(faults);
 };
 
 export const getFaults = async (req) => {
-	const { tenant } = req.user;
+	const { tenant, _id: userId } = req.user;
 	const { filters } = req.body;
-	let addQuery = getFaultsQueryParams(filters);
+	const { permLevel } = req.headers;
 
-	const faults = await Fault.find({ tenant: tenant, ...addQuery}).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+	let addQuery = {
+		...getFaultsQueryParams(filters),
+		...getRelatedQuery(permLevel, userId),
+	};
+
+	const faults = await Fault.find({ tenant: tenant, ...addQuery }).populate([
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: {
+				path: 'role',
+				model: 'Role',
+				select: 'roleName',
+			},
+		},
 		{ path: 'asset' },
 		{ path: 'system' },
 		{ path: 'status' },
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: { path: 'role', model: 'Role', select: 'roleName' },
+		},
 		{
 			path: 'comments',
 			populate: {
@@ -222,14 +332,43 @@ export const getFaults = async (req) => {
 
 export const getFault = async (req) => {
 	const { faultId, plain } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	if (plain) {
 		return await Fault.findOne({ _id: faultId }).populate('status');
 	}
 	return await Fault.findOne({ faultId: faultId }).populate([
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'owner',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: {
+				path: 'role',
+				model: 'Role',
+				select: 'roleName',
+			},
+		},
 		{ path: 'asset' },
 		{ path: 'system' },
-		{ path: 'following', select: 'firstName lastName phoneNumber avatar' },
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber avatar role',
+			populate: {
+				path: 'role',
+				model: 'Role',
+				select: 'roleName',
+			},
+		},
 		{
 			path: 'comments',
 			populate: {
@@ -247,9 +386,9 @@ export const getFaultsQueryParams = (query) => {
 	delete query.sortOrder;
 	delete query.viewType;
 
-	Object.entries(query).forEach(entry => {
+	Object.entries(query).forEach((entry) => {
 		if (!entry[1]) {
-			delete query[entry[0]]
+			delete query[entry[0]];
 		}
 	});
 
@@ -262,6 +401,18 @@ export const getFaultsQueryParams = (query) => {
 
 export const addFaultComment = async (req) => {
 	const { faultId, userId, text } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	const comment = new Comment({
 		parentObject: faultId,
 		user: userId,
@@ -292,6 +443,18 @@ export const addFaultComment = async (req) => {
 
 export const updateFaultComment = async (req) => {
 	const { faultId, commentId, text } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	let updated = await Comment.findOneAndUpdate(
 		{ _id: commentId },
 		{ text },
@@ -304,12 +467,23 @@ export const updateFaultComment = async (req) => {
 			model: 'User',
 			select: 'firstName lastName avatar',
 		},
-
 	});
 };
 
 export const changeFaultStatus = async (req) => {
 	const { faultId, status } = req.body;
+
+	const isRelated = await isUserRelated(
+		'faults',
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: 'unauthorized', status: 403 };
+	}
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
 		{ status },
@@ -319,11 +493,10 @@ export const changeFaultStatus = async (req) => {
 
 export const getFaultOptions = async (req) => {
 	const query = req.body;
-	Object.entries(query).forEach(o => {
+	Object.entries(query).forEach((o) => {
 		if (!o[1]) {
 			delete query[0];
 		}
-	})
+	});
 	return await Fault.find({ ...query });
-}
-
+};

@@ -62,12 +62,16 @@ export const removeFile = async (module, parent, filename) => {
 export const removeDuplicateObjectIds = inputArray => {
     const sortedArray = inputArray.sort((a,b) => (a.toString() > b.toString() ? 1 : (a.toString() < b.toString() ? -1 : 0)));
 
-    let lastSeen = undefined;
+    let lastSeen = null;
     return sortedArray.reduce((sum, element) => {
-       if(lastSeen !== element.toString()){
+       if(lastSeen != element){
            sum.push(element);
        }
-       lastSeen = element.toString();
+       lastSeen = element;
        return sum;
     }, []);
+};
+
+export const getUnauthorizedMessage = () => {
+	return { error: true, reason: 'unauthorized', status: 403 }
 };
