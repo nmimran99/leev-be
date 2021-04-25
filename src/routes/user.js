@@ -1,14 +1,16 @@
 import { Router } from 'express';
 import * as controller from '../controller/user';
 import { uploadAvatar } from '../services/multer.service';
-import * as authService from '../middleware/authenticate';
+import { authenticate } from '../middleware/authenticate';
+import { authorize } from '../middleware/authorize';
 
 
 const router = Router();
 
-router.post('/uploadAvatar', uploadAvatar.single('avatar'), controller.uploadAvatar);
-router.post('/removeAvatar', controller.removeAvatar);
-router.post('/registerUser',uploadAvatar.single('avatar'), controller.registerUser);
+router.post('/uploadAvatar', authenticate, authorize, uploadAvatar.single('avatar'), controller.uploadAvatar);
+router.post('/removeAvatar', authenticate, authorize, controller.removeAvatar);
+router.post('/updateUserData', authenticate, authorize, controller.updateUserData);
+router.post('/registerUser',authenticate, authorize, uploadAvatar.single('avatar'), controller.registerUser);
 router.post('/loginUser', controller.loginUser);
 router.post('/reloginUser', controller.reloginUser);
 router.post('/disableUser', controller.disableUser);
@@ -17,10 +19,10 @@ router.post('/deleteUser', controller.deleteUser);
 router.post('/resetPasswordLink', controller.resetPasswordLink);
 router.post('/setNewPassword', controller.setNewPassword);
 router.post('/authorizeSetNewPassword', controller.authorizeSetNewPassword);
-router.get('/getUserList', controller.getUserList);
+router.get('/getUserList', authenticate, authorize, controller.getUserList);
 router.post('/getUsersData', controller.getUsersData);
-router.post('/getUserDataById', controller.getUserDataById);
-router.post('/updateUserRole', authService.authenticate, controller.updateUserRole);
+router.post('/getUserDataById', authenticate, authorize, controller.getUserDataById);
+router.post('/updateUserRole', authenticate, authorize, controller.updateUserRole);
 
 
 // TODO

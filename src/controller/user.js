@@ -13,6 +13,18 @@ export const registerUser = async (req, res) => {
     }  
 }
 
+export const updateUserData = async (req, res) => {
+    try{
+        let data = await userService.updateUserData(req);
+        if (data.error) {
+            return res.status(400).send(data.error.details);
+        }
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
 export const uploadAvatar = async (req, res) => {
     try{
         let data = await userService.uploadAvatar(req);
@@ -133,6 +145,9 @@ export const authorizeSetNewPassword = async (req, res) => {
 export const getUserList = async (req, res) => {
     try {
         let data = await userService.getUserList(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data)
     } catch(e) {
         return res.status(500).send(e.message)
@@ -153,6 +168,9 @@ export const getUsersData = async (req, res) => {
 export const getUserDataById = async (req, res) => {
     try {
         let data = await userService.getUserDataById(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
         return res.status(200).send(data)
     } catch(e) {
         return res.status(500).send(e.message)

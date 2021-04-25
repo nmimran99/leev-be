@@ -32,6 +32,12 @@ export const getRole = async (req) => {
     }  
 }
 
+export const getRoles = async (req) => {
+    const { _id: tenant } = req.user.tenant;
+    return await Role.find({ tenant })
+    
+}
+
 export const updateRole = async (req) => {
     const { _id: lastUpdatedBy } = req.user;
     const { roleId, permissions } = req.body;

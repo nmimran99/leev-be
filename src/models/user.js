@@ -18,6 +18,7 @@ const userSchema = new Schema({
     lastName: String,
     phoneNumber: String,
     birthDate: Date,
+    employedBy: String,
     createdBy: String,
     avatar: String,
     isActive: { type: Boolean, default: true },

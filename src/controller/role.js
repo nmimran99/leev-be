@@ -13,6 +13,19 @@ export const getRole = async (req, res) => {
 	}
 };
 
+export const getRoles = async (req, res) => {
+	try {
+		let data = await roleService.getRoles(req);
+		if (data.error) {
+			return res.status(403).send('unauthorized');
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		console.log(e.message);
+		return res.status(500).send(e.message);
+	}
+};
+
 export const createRole = async (req, res) => {
 	try {
 		let data = await roleService.createRole(req);

@@ -1,12 +1,11 @@
 
 export const authorize = (req, res, next) => {
-
 	const { requesttype, module } = req.headers;
     const { role } = req.user;
-    
+	
     const modulePermissions = role.permissions.find((p) => p.module === module);
 	const permLevel = modulePermissions[requesttype];
-	console.log(requesttype, permLevel)
+	
 	if (permLevel < getMinPermLevel(requesttype)) {
 		return res.status(403).send({ error: true, status: 403, reason: 'unauthorized' });
     }
@@ -38,6 +37,11 @@ export const isUserRelated = async (type, schemaObject, itemId, userId, permLeve
 		const condition = itemId.match(/^[0-9a-fA-F]{24}$/) ? { _id: itemId } : { [type.slice(0,-1) + 'Id']: itemId };
 		const item = await schemaObject.findOne(condition, `owner ${['faults', 'tasks'].includes(type) ? 'relatedUsers' : ''}`);
 		if (item) {
+			if (item._id) {
+				if (item._id.equals(userId)) {
+					return true
+				}
+			}
 			if (item.relatedUsers) {
 				if (item.relatedUsers.includes(userId)){
 					return true;
