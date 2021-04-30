@@ -1,5 +1,6 @@
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
 import Asset from '../models/asset';
+import System from '../models/system';
 import { geoCode } from './geocoder.service';
 
 export const createAsset = async (req) => {
@@ -145,3 +146,17 @@ export const getAssetsQueryParams = (query) => {
 	}
 	return query;
 };
+
+export const getAssetExternal = async (req) => {
+	const { assetId } = req.body;
+	
+	try {
+		const asset = await Asset.findOne({ _id: assetId }, 'address');
+		const systems = await System.find({ asset: asset._id }, 'name');
+
+		return { asset, systems: systems.length ? systems : null };
+	} catch(e){
+		return { error: true, reason: 'asset or systems not found', status: 200 };
+	}
+
+}

@@ -12,5 +12,6 @@ router.post('/updateAssetType', authenticate, authorize, controller.updateAssetT
 router.post('/getAssets', authenticate, authorize, controller.getAssets);
 router.post('/getAsset', authenticate, authorize, controller.getAsset);
 router.post('/removeAsset', authenticate, authorize, controller.removeAsset);
+router.post('/getAssetExternal', controller.getAssetExternal);
 
 export default router;

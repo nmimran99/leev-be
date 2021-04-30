@@ -175,6 +175,18 @@ export const getUserDataById = async (req, res) => {
     } catch(e) {
         return res.status(500).send(e.message)
     }
- 
+}
+
+
+export const verifyEmailExists = async (req, res) => {
+    try {
+        let data = await userService.verifyEmailExists(req);
+        if (data.error) {
+            return res.status(data.status).send(data);
+        }
+        return res.status(200).send(data)
+    } catch(e) {
+        return res.status(500).send(e.message)
+    }
 }
 

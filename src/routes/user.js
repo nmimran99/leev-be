@@ -23,6 +23,7 @@ router.get('/getUserList', authenticate, authorize, controller.getUserList);
 router.post('/getUsersData', controller.getUsersData);
 router.post('/getUserDataById', authenticate, authorize, controller.getUserDataById);
 router.post('/updateUserRole', authenticate, authorize, controller.updateUserRole);
+router.post('/verifyEmailExists', controller.verifyEmailExists);
 
 
 // TODO

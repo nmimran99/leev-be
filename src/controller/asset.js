@@ -83,3 +83,15 @@ export const removeAsset = async (req, res) => {
         return res.status(500).send(e.message);
     }  
 }
+
+export const getAssetExternal = async (req, res) => {
+    try{
+        let data = await assetService.getAssetExternal(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}

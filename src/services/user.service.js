@@ -290,3 +290,20 @@ export const getUserDataById = async (req) => {
 		'_id tenant firstName lastName email phoneNumber birthDate employedBy avatar role isActive'
 	).populate('role');
 };
+
+export const verifyEmailExists = async (req) => {
+    const { email } = req.body;
+    let user = await User.find({ email });
+    if (!user.length) {
+        return {
+            error: true,
+            reason: 'Email not found',
+            status: 200
+        };
+    }
+    return {
+        error: false,
+        status: 200,
+        reason: 'Email found successfully'
+    };
+}
