@@ -5,12 +5,13 @@ import System from '../models/system';
 import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Status from '../models/status';
 import { isUserRelated, getRelatedQuery } from '../middleware/authorize';
+import User from '../models/user';
 
 // function without permission checking are functions that are allowing only item.read === 2;
 // only permLevel that is being checked is 1.
 
 export const createFault = async (req) => {
-	const {
+	let {
 		tenant,
 		title,
 		description,
@@ -29,7 +30,7 @@ export const createFault = async (req) => {
 	}
 
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
-	let assetData = await Asset.findOne({ _id: asset }, 'owner');
+	let assetData = await Asset.findOne({ _id: asset }, 'tenant owner');
 	let systemData = await System.findOne({ _id: system }, 'owner');
 
 	let relatedUsersArr = [];
@@ -38,16 +39,16 @@ export const createFault = async (req) => {
 	relatedUsersArr = relatedUsersArr.filter((v) => v.toString() !== owner);
 
 	let fault = new Fault({
-		tenant,
+		tenant: tenant || assetData.tenant,
 		title,
 		description,
 		asset,
 		system,
-		owner,
+		owner: owner || systemData.owner,
 		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
-		createdBy,
-		lastUpdatedBy: createdBy,
+		createdBy: createdBy || systemData.owner,
+		lastUpdatedBy: createdBy || systemData.owner,
 		images,
 		comments: [],
 	});
@@ -67,6 +68,7 @@ export const createFault = async (req) => {
 		{ new: true }
 	);
 };
+
 
 export const deleteFault = async (req) => {
 	const { faultId } = req.body;
@@ -500,3 +502,13 @@ export const getFaultOptions = async (req) => {
 	});
 	return await Fault.find({ ...query });
 };
+
+export const assignUserToExternalFault = async (req) => {
+	const { userId, faultId } = req.body;
+
+	let fault = await Fault.findOne({_id: faultId});
+	fault.createdBy = userId;
+	fault.relatedUsers.push(userId);
+
+	return await fault.save();
+}

@@ -8,6 +8,7 @@ import { authorize } from '../middleware/authorize';
 const router = Router();
 
 router.post('/createFault', authenticate, authorize, uploadFaultImage.array('images', 10), controller.createFault);
+router.post('/createExternalFault', uploadFaultImage.array('images', 10), controller.createFault);
 router.post('/deleteFault', authenticate, authorize, controller.deleteFault);
 router.post('/updateRelatedUsers', authenticate, authorize, controller.updateRelatedUsers);
 router.post('/updateFaultOwner', authenticate, authorize, controller.updateFaultOwner);
@@ -21,5 +22,6 @@ router.post('/deleteFaultComment', authenticate, authorize, controller.deleteFau
 router.post('/updateFaultComment', authenticate, authorize, controller.updateFaultComment);
 router.post('/changeFaultStatus', authenticate, authorize, controller.changeFaultStatus);
 router.post('/getFaultOptions', authenticate, authorize, controller.getFaultOptions);
+router.post('/assignUserToExternalFault', controller.assignUserToExternalFault);
 
 export default router;

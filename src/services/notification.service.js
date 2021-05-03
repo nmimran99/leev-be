@@ -105,22 +105,16 @@ export const getDistributionList = (data, type, actionBy) => {
 			resolve([data.updateDescription.updatedFields.relatedUser]);
 		} else {
 			let dist = [];
-			const relatedUsers =
-				data.fullDocument.relatedUsers;
+			const relatedUsers = data.fullDocument.relatedUsers;
 			relatedUsers.forEach((r) => {
-				if (r.equals(actionBy)) {
+				if (actionBy && r.equals(actionBy)) {
 					return;
 				}
 				dist.push(r);
 			});
-			if (!actionBy.equals(data.fullDocument.owner)) {
+			if (actionBy && !actionBy.equals(data.fullDocument.owner)) {
 				dist.push(data.fullDocument.owner);
 			}
-
-			// if (data.fullDocument.system) {
-			// 	const system = await System.findOne({ _id: data.fullDocument.system });
-			// 	dist.push(system.relatedUsers);
-			// }
 			resolve(removeDuplicateObjectIds(dist));
 		}
 	});

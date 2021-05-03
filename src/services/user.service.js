@@ -304,6 +304,7 @@ export const verifyEmailExists = async (req) => {
     return {
         error: false,
         status: 200,
-        reason: 'Email found successfully'
+        reason: 'Email found successfully',
+		userId: user[0]._id
     };
 }
