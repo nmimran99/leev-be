@@ -12,7 +12,6 @@ import User from '../models/user';
 
 export const createFault = async (req) => {
 	let {
-		tenant,
 		title,
 		description,
 		asset,
@@ -39,7 +38,7 @@ export const createFault = async (req) => {
 	relatedUsersArr = relatedUsersArr.filter((v) => v.toString() !== owner);
 
 	let fault = new Fault({
-		tenant: tenant || assetData.tenant,
+		tenant: req.user ? req.user.tenant : assetData.tenant,
 		title,
 		description,
 		asset,

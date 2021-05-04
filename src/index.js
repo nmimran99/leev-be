@@ -16,8 +16,11 @@ import userRoute from './routes/user';
 import mapRoute from './routes/map';
 import roleRoute from './routes/role';
 import notificationRoute from './routes/notification';
+import path from 'path';
 global.fetch = require('node-fetch');
 global.crypto = require('crypto');
+global.appRoot = path.resolve(__dirname);
+global.publicFolder = path.join(process.cwd(), '/public');
 
 const app = express();
 app.use(cors());
@@ -40,6 +43,7 @@ app.use('/documents', docRoute);
 app.use('/notifications', notificationRoute);
 app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
+
 
 mongoose.connect(
 	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`,
