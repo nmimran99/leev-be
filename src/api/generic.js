@@ -60,6 +60,18 @@ export const removeFile = async (module, parent, filename) => {
     
 }
 
+export const removeFileByPath = async (filepath) => {
+    return new Promise((resolve, reject) => {
+        if (!fs.existsSync(filepath)) resolve(true);
+        fs.unlink(filepath, function(err){
+            if (err)
+                console.log(err)
+        });
+        console.log(filepath, ' was removed');
+        resolve(true);
+    })
+    
+}
 export const removeDuplicateObjectIds = inputArray => {
     const sortedArray = inputArray.sort((a,b) => (a.toString() > b.toString() ? 1 : (a.toString() < b.toString() ? -1 : 0)));
 
@@ -76,3 +88,8 @@ export const removeDuplicateObjectIds = inputArray => {
 export const getUnauthorizedMessage = () => {
 	return { error: true, reason: 'unauthorized', status: 403 }
 };
+
+
+export const createURL = async (fileName) => {
+    return `${process.env.BACKEND_URL}/${fileName}`
+}

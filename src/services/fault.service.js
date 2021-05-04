@@ -6,6 +6,7 @@ import { relocateFile, removeUnlistedImages } from '../api/generic';
 import Status from '../models/status';
 import { isUserRelated, getRelatedQuery } from '../middleware/authorize';
 import User from '../models/user';
+import { uploadImagesToBlob } from '../api/blobApi';
 
 // function without permission checking are functions that are allowing only item.read === 2;
 // only permLevel that is being checked is 1.
@@ -22,11 +23,11 @@ export const createFault = async (req) => {
 	} = req.body;
 	let images = [];
 
-	if (req.files.length) {
-		req.files.forEach((f) => {
-			images.push(f.filename);
-		});
-	}
+	// if (req.files.length) {
+	// 	req.files.forEach((f) => {
+	// 		images.push(f.filename);
+	// 	});
+	// }
 
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
 	let assetData = await Asset.findOne({ _id: asset }, 'tenant owner');
@@ -48,22 +49,24 @@ export const createFault = async (req) => {
 		status: initStatus._id,
 		createdBy: createdBy || systemData.owner,
 		lastUpdatedBy: createdBy || systemData.owner,
-		images,
+		images: [],
 		comments: [],
 	});
 
 	let savedFault = await fault.save();
-	if (!savedFault.images.length) return savedFault;
-	await Promise.all(
-		savedFault.images.map(async (image, index) => {
-			let newURL = await relocateFile(image, savedFault._id, 'faults');
-			savedFault.images[index] = newURL;
-		})
-	);
+	// if (!savedFault.images.length) return savedFault;
+	
+	const urls = await uploadImagesToBlob(req.files)
+	// await Promise.all(
+	// 	savedFault.images.map(async (image, index) => {
+	// 		let newURL = await relocateFile(image, savedFault._id, 'faults');
+	// 		savedFault.images[index] = newURL;
+	// 	})
+	// );
 
 	return await Fault.findOneAndUpdate(
 		{ _id: savedFault._id },
-		{ images: savedFault.images },
+		{ images: urls },
 		{ new: true }
 	);
 };
