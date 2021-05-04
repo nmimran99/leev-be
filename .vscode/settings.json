@@ -3,5 +3,6 @@
     "appService.zipIgnorePattern": [
         "node_modules{,/**}",
         ".vscode{,/**}"
-    ]
+    ],
+    "appService.defaultWebAppToDeploy": "/subscriptions/e028dcaa-4abd-4581-accd-9db9461dcdd3/resourceGroups/appsvc_linux_centralus/providers/Microsoft.Web/sites/Leev"
 }

@@ -22,10 +22,10 @@ export const removeUnlistedImages = (URLs, module, parent) => {
     if (!URLs) return;
     let basenames = [];
     URLs.forEach((item, i) => {
-        URLs[i] = item.replace(process.env.BACKEND_URL, process.env.FS_LOCAL)
+        URLs[i] = item.replace(process.env.BACKEND_URL, publicFolder)
         basenames[i] = path.basename(item);
     });
-    const dir = URLs.length ? path.dirname(URLs[0]) : path.join(process.env.FS_LOCAL, module, parent);
+    const dir = URLs.length ? path.dirname(URLs[0]) : path.join(publicFolder, module, parent);
 
     if (!basenames.length) {
         fs.rmdirSync(dir, { recursive: true });
@@ -48,7 +48,7 @@ export const removeUnlistedImages = (URLs, module, parent) => {
 
 export const removeFile = async (module, parent, filename) => {
     return new Promise((resolve, reject) => {
-        const filePath = path.join(process.env.FS_LOCAL, module, parent, filename);
+        const filePath = path.join(publicFolder, module, parent, filename);
         if (!fs.existsSync(filePath)) resolve(true);
         fs.unlink(filePath, function(err){
             if (err)
