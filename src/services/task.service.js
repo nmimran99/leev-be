@@ -4,6 +4,7 @@ import Status from '../models/status';
 import Comment from '../models/comment';
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
 import { getUnauthorizedMessage } from '../api/generic';
+import { uploadImagesToBlob } from '../api/blobApi';
 
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
@@ -56,18 +57,17 @@ export const getTask = async (req) => {
 };
 
 export const createTask = async (req) => {
-	let images = [];
+	// let images = [];
 
-	if (req.files.length) {
-		req.files.forEach((f) => {
-			console.log(f);
-			images.push(f.filename);
-		});
-	}
+	// if (req.files.length) {
+	// 	req.files.forEach((f) => {
+	// 		console.log(f);
+	// 		images.push(f.filename);
+	// 	});
+	// }
 
 	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
 	const {
-		tenant,
 		title,
 		description,
 		asset,
@@ -83,7 +83,7 @@ export const createTask = async (req) => {
 	} = req.body;
 
 	const task = new Task({
-		tenant,
+		tenant: req.user.tenant,
 		title,
 		description,
 		asset: asset || null,
@@ -97,22 +97,24 @@ export const createTask = async (req) => {
 		schedule: JSON.parse(schedule),
 		createdBy,
 		status: initStatus,
-		images,
+		images: [],
 	});
 
 	let savedTask = await task.save();
 
-	if (!savedTask.images.length) return savedTask;
-	await Promise.all(
-		savedTask.images.map(async (image, index) => {
-			let newURL = await relocateFile(image, savedTask._id, 'tasks');
-			savedTask.images[index] = newURL;
-		})
-	);
+	// if (!savedTask.images.length) return savedTask;
+	// await Promise.all(
+	// 	savedTask.images.map(async (image, index) => {
+	// 		let newURL = await relocateFile(image, savedTask._id, 'tasks');
+	// 		savedTask.images[index] = newURL;
+	// 	})
+	// );
+
+	const urls = await uploadImagesToBlob(req.files);
 
 	return await Task.findOneAndUpdate(
 		{ _id: savedTask._id },
-		{ images: savedTask.images },
+		{ images: urls },
 		{ new: true }
 	);
 };
@@ -143,26 +145,28 @@ export const updateTask = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	let prepImages = [];
-	let images = [];
-	if (req.files.length) {
-		req.files.forEach((f) => {
-			images.push(f.filename);
-		});
+	// let prepImages = [];
+	// let images = [];
+	// if (req.files.length) {
+	// 	req.files.forEach((f) => {
+	// 		images.push(f.filename);
+	// 	});
 
-		await Promise.all(
-			images.map(async (image, index) => {
-				let newURL = await relocateFile(image, _id, 'tasks');
-				prepImages[index] = newURL;
-			})
-		);
-	}
+	// 	await Promise.all(
+	// 		images.map(async (image, index) => {
+	// 			let newURL = await relocateFile(image, _id, 'tasks');
+	// 			prepImages[index] = newURL;
+	// 		})
+	// 	);
+	// }
 
-	removeUnlistedImages(
-		[...prepImages, ...JSON.parse(uploadedImages)],
-		'tasks',
-		_id
-	);
+	// removeUnlistedImages(
+	// 	[...prepImages, ...JSON.parse(uploadedImages)],
+	// 	'tasks',
+	// 	_id
+	// );
+
+	const urls = await uploadImagesToBlob(req.files);
 
 	return await Task.findOneAndUpdate(
 		{ _id: _id },
@@ -176,7 +180,7 @@ export const updateTask = async (req) => {
 			isUsingSteps,
 			isSequntial,
 			isRepeatable,
-			images: [...prepImages, ...JSON.parse(uploadedImages)],
+			images: [...urls, ...JSON.parse(uploadedImages)],
 			lastUpdatedBy: req.user._id
 		},
 		{ new: true }

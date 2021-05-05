@@ -8,6 +8,7 @@ import { generateAccessToken, authenticate, genereateResetPasswordUrl } from './
 import { sendMail } from '../smtp/mail';
 import { relocateFile } from '../api/generic';
 import { isUserRelated } from '../middleware/authorize';
+import { uploadImagesToBlob } from '../api/blobApi';
 
 export const registerUser = async (req) => {
 	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role } = req.body;
@@ -39,8 +40,9 @@ export const registerUser = async (req) => {
 	});
 
 	let savedUser = await user.save();
-	let newURL = await relocateFile(savedUser.avatar, savedUser._id, 'users');
-	savedUser.avatar = newURL;
+	// let newURL = await relocateFile(savedUser.avatar, savedUser._id, 'users');
+	const newURL = await uploadImagesToBlob([req.file]);
+	savedUser.avatar = newURL[0];
 	return await savedUser.save();
 };
 
@@ -56,16 +58,17 @@ export const uploadAvatar = async (req) => {
 	const user = await User.findOne({ _id: userId }, 'avatar');
 	if (!user) return;
 
-	if (user.avatar) {
-		let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
-		if (fs.existsSync(oldAvatar)) {
-			fs.unlinkSync(oldAvatar);
-		}
-	}
+	// if (user.avatar) {
+	// 	let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
+	// 	if (fs.existsSync(oldAvatar)) {
+	// 		fs.unlinkSync(oldAvatar);
+	// 	}
+	// }
 
-	let newAvatar = req.file.filename;
-	let newURL = await relocateFile(newAvatar, userId, 'users');
-	return await User.findOneAndUpdate({ _id: userId }, { avatar: newURL }, { new: true });
+	// let newAvatar = req.file.filename;
+	// let newURL = await relocateFile(newAvatar, userId, 'users');
+	const newURL = await uploadImagesToBlob([req.file]);
+	return await User.findOneAndUpdate({ _id: userId }, { avatar: newURL[0] }, { new: true });
 };
 
 export const updateUserData = async (req) => {
@@ -90,12 +93,13 @@ export const removeAvatar = async (req) => {
 	const user = await User.findOne({ _id: userId });
 	if (!user) return;
 
-	if (user.avatar) {
-		let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
-		if (fs.existsSync(oldAvatar)) {
-			fs.unlinkSync(oldAvatar);
-		}
-	}
+	// if (user.avatar) {
+	// 	let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
+	// 	if (fs.existsSync(oldAvatar)) {
+	// 		fs.unlinkSync(oldAvatar);
+	// 	}
+	// }
+	
 	return await User.findOneAndUpdate({ _id: userId }, { avatar: null }, { new: true });
 };
 

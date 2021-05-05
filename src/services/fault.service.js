@@ -215,26 +215,28 @@ export const updateFaultData = async (req) => {
 		return { error: true, reason: 'unauthorized', status: 403 };
 	}
 
-	let prepImages = [];
-	let images = [];
-	if (req.files.length) {
-		req.files.forEach((f) => {
-			images.push(f.filename);
-		});
+	// let prepImages = [];
+	// let images = [];
+	// if (req.files.length) {
+	// 	req.files.forEach((f) => {
+	// 		images.push(f.filename);
+	// 	});
 
-		await Promise.all(
-			images.map(async (image, index) => {
-				let newURL = await relocateFile(image, _id, 'faults');
-				prepImages[index] = newURL;
-			})
-		);
-	}
+	// 	await Promise.all(
+	// 		images.map(async (image, index) => {
+	// 			let newURL = await relocateFile(image, _id, 'faults');
+	// 			prepImages[index] = newURL;
+	// 		})
+	// 	);
+	// }
 
-	removeUnlistedImages(
-		[...prepImages, ...JSON.parse(uploadedImages)],
-		'faults',
-		_id
-	);
+	// removeUnlistedImages(
+	// 	[...prepImages, ...JSON.parse(uploadedImages)],
+	// 	'faults',
+	// 	_id
+	// );
+
+	const urls = await uploadImagesToBlob(req.files);
 
 	return await Fault.findOneAndUpdate(
 		{ _id: _id },
@@ -244,7 +246,7 @@ export const updateFaultData = async (req) => {
 			asset,
 			system,
 			owner,
-			images: [...prepImages, ...JSON.parse(uploadedImages)],
+			images: [...urls, ...JSON.parse(uploadedImages)],
 			lastUpdatedBy: req.user._id,
 		},
 		{ new: true }
