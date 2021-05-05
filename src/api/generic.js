@@ -91,5 +91,5 @@ export const getUnauthorizedMessage = () => {
 
 
 export const createURL = async (fileName) => {
-    return `${process.env.BACKEND_URL}/${fileName}`
+    return `${process.env.BLOB_IMAGES_URL}/${fileName}`
 }
