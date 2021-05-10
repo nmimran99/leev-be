@@ -1,0 +1,10 @@
+{
+    "email": {
+        "faultCreatedSuccessfully": "You have succesfully cretaed a fault.",
+        "faultFollowInstructions": "In order to follow the progress of the fault, please follow the link below",
+        "system": "System",
+        "faultTitle": "Title",
+        "faultDescription": "Description",
+        "faultAssignEmailSubject": "Leev - Fault created successfully"
+    }
+}

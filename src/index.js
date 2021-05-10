@@ -18,6 +18,11 @@ import roleRoute from './routes/role';
 import notificationRoute from './routes/notification';
 import path from 'path';
 import cron from 'node-cron';
+import i18next from 'i18next';
+import i18nextMiddleware from 'i18next-express-middleware';
+import Backend from 'i18next-node-fs-backend';
+import en from './locales/en/translation.json';
+import he from './locales/he/translation.json';
 global.fetch = require('node-fetch');
 global.crypto = require('crypto');
 global.appRoot = path.resolve(__dirname);
@@ -31,6 +36,34 @@ app.use(bodyParser.json());
 app.use(methodOverride('_method'));
 app.use(express.static(process.cwd() + '/public'));
 
+i18next
+	.use(i18nextMiddleware.LanguageDetector)
+	.init({
+		resources: {
+			en: {
+				translation: en
+			},
+			he: {
+				translation: he
+			}
+		},
+		detection: {
+		order: ['querystring', 'cookie'],
+		caches: ['cookie']
+		},
+		preload: ['en', 'he'],
+		saveMissing: true,
+		fallBackLng: ['he']
+	}, function(err, t) {
+        if (err) {
+            console.log(err);
+            return;
+        }
+        console.log('i18n loaded')
+        
+    });
+
+app.use(i18nextMiddleware.handle(i18next));
 
 app.use('/users', userRoute);
 app.use('/auth', authRoute);

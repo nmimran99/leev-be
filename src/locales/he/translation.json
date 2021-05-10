@@ -1,0 +1,10 @@
+{
+    "email": {
+        "faultCreatedSuccessfully": "תקלה נוצרה בהצלחה",
+        "faultFollowInstructions": "על מנת לעקוב אחר התקדמות הטיפול בתקלה, אנא לחץ על הלינק הבא",
+        "system": "מערכת",
+        "faultTitle": "כותרת תקלה",
+        "faultDescription": "תיאור תקלה",
+        "faultAssignEmailSubject": "Leev - תקלה נפתחה בהצלחה"
+    }
+}

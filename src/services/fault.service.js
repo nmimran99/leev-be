@@ -7,6 +7,9 @@ import Status from '../models/status';
 import { isUserRelated, getRelatedQuery } from '../middleware/authorize';
 import User from '../models/user';
 import { uploadImagesToBlob } from '../api/blobApi';
+import { getAddress } from './asset.service';
+import i18next from 'i18next';
+import { sendMail } from '../smtp/mail';
 
 // function without permission checking are functions that are allowing only item.read === 2;
 // only permLevel that is being checked is 1.
@@ -509,10 +512,52 @@ export const getFaultOptions = async (req) => {
 
 export const assignUserToExternalFault = async (req) => {
 	const { userId, faultId } = req.body;
+	try {
+		const user = await User.findOne({ _id: userId });
+		let fault = await Fault.findOne({_id: faultId}).populate([
+			{ path: 'asset' },
+			{ path: 'system' }
+		]);
+		fault.createdBy = userId;
+		fault.relatedUsers.push(userId); 
+		
+		await fault.save();
+		await notifyUserAssigned(user, fault);
+		return true;
+	} catch(e) {
+		console.log(e.message);
+		return false
+	}
+	
+}
 
-	let fault = await Fault.findOne({_id: faultId});
-	fault.createdBy = userId;
-	fault.relatedUsers.push(userId);
-
-	return await fault.save();
+export const notifyUserAssigned = async (user, fault) => {
+	try {
+		const t = i18next.getFixedT(user.lang);
+		console.log(fault)
+			let d = await sendMail({
+			from: 'system@leev.co.il',
+			to: user.email,
+			subject: t("email.faultAssignEmailSubject"),
+			template: 'userassigned',
+			context: {
+				address: getAddress(fault.asset.address).address,
+				faultCreatedSuccessfully: t("email.faultCreatedSuccessfully"),
+				faultFollowInstructions: t("email.faultFollowInstructions"),
+				faultId: fault.faultId,
+				faultLink: `http://www.leev.co.il/workspace/faults/${fault.faultId}`,
+				systemLabel: t("email.system"),
+				systemData: fault.system.name,
+				titleLabel: t("email.faultTitle"),
+				titleData: fault.title,
+				descriptionLabel: t("email.faultDescription"),
+				descriptionData: fault.description,
+				lang: user.lang === 'he' ? 'rtl' : 'ltr'
+			}
+		});
+		
+	} catch(e) {
+		console.log(e.message)
+		return e.message
+	}
 }
