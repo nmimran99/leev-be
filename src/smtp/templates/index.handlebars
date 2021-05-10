@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        
+        * {
+            color: white
+        }
+        
+        div {
+            font-family: system-ui;
+            color: white
+        }
+
+        .container {
+            width: 375px;
+            height: fit-content;
+            padding: 20px;
+            background: #42A5F5;
+            border-radius: 10px;
+
+        }
+
+        .image-container {
+            width: 100%;
+            height: fit-content;
+            display: flex;
+            justify-content: center;
+            
+        }
+
+        .address-container {
+            width: fit-content;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            color: white;
+            font-size: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 0px 20px;
+            border-radius: 50px;
+            margin: 0 auto 15px;
+            line-height: 2.4;
+        }
+
+        .fault-success {
+            margin: '10px auto';
+            text-align: center;
+            line-height: 2;
+            font-size: 16px
+        }
+
+        .fault-intsructions {
+            margin: 10px auto;
+            text-align: center;
+            line-height: 2;
+            font-size: 12px
+        }
+
+        .fault-link {
+            margin: 10px auto 30px;
+            text-align: center;
+            line-height: 2.3;
+            background: black;
+            padding: 3px 30px;
+            border-radius: 50px;
+            color: white;
+            width: fit-content;
+            font-size: 14px;
+        }
+
+        .details-container {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px 30px;
+            border-radius: 10px;
+            margin: 0 auto 10px;
+        }
+
+        .detail-container {
+            padding: 10px 0;
+        }
+
+        .detail-label {
+            width: 100%;
+            font-size: 16px;
+            font-weight: 400;
+            
+        }
+        .detail-desc {
+            width: 100%;
+            font-size: 13px;
+        }
+
+    </style>
+</head>
+
+<body class='outer-container'>
+    <div class='container'>
+        <div class='image-container'>
+            <img src='https://leevstore.blob.core.windows.net/images/leev_logo.png'
+                style='width: 200px; height: 200px; margin: 0 auto;' />
+        </div>
+        <div class='address-container'>
+            אחד העם 1, תל אביב
+        </div>
+        <div class='fault-success'>
+            תקלה נוצרה בהצלחה
+        </div>
+        <div class='fault-intsructions'>
+            על מנת לעקוב אחר התקדמות הטיפול בתקלה, אנא לחץ על הלינק הבא
+        </div>
+        <div class='fault-link'>
+            <a href='http://www.leev.co.il/workspace/faults/FLT-243' style='color: white;'>
+                FLT-243
+            </a>
+        </div>
+        <div class='details-container'>
+            <div class='detail-container'>
+                <div class='detail-label'>
+                    מערכת
+                </div>
+                <div class='detail-desc'>
+                    מעליות
+                </div>
+            </div>
+            <div class='detail-container'>
+                <div class='detail-label'>
+                    כותרת תקלה
+                </div>
+                <div class='detail-desc'>
+                    כותרת תקלה כלשהי
+                </div>
+            </div>
+            <div class='detail-container'>
+                <div class='detail-label'>
+                    תיאור תקלה
+                </div>
+                <div class='detail-desc'>
+                    תיאור תקלה ארוך תיאור תקלה ארוך תיאור תקלה ארוך
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

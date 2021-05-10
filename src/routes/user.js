@@ -3,6 +3,8 @@ import * as controller from '../controller/user';
 import { uploadAvatar } from '../services/multer.service';
 import { authenticate } from '../middleware/authenticate';
 import { authorize } from '../middleware/authorize';
+import { sendMail } from '../smtp/mail';
+
 
 
 const router = Router();
@@ -25,7 +27,18 @@ router.post('/getUserDataById', authenticate, authorize, controller.getUserDataB
 router.post('/updateUserRole', authenticate, authorize, controller.updateUserRole);
 router.post('/verifyEmailExists', controller.verifyEmailExists);
 
+router.post('/sendTestEmail', async (req, res) => {
+    let d = await sendMail({
+        from: 'system@leev.co.il',
+        to: 'nmimran99@gmail.com',
+        subject: 'test',
+        template: 'index',
+        context: {}
+    });
 
+    return res.status(200).send(d);
+
+})
 // TODO
 // 1. add middleware to delete user to make sure the user that performs the action has permission
 // 2. add middleware to register user to make sure the user that performs the action has permission

@@ -3,16 +3,6 @@ const { incrementCounter } = require('../services/counter.service');
 const { createNotification } = require('../services/notification.service');
 const Schema = mongoose.Schema;
 
-const alertSchema = new Schema({
-    tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User'},
-    startDate: Date,
-    interval: String,
-    intervalNumber: Number
-}, {
-    timestamps: true
-});
-
 const taskSchema = new Schema({
     tenant: { type: Schema.Types.ObjectId, ref: 'Tenant'},
     taskId: String,
@@ -24,14 +14,15 @@ const taskSchema = new Schema({
     status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     createdBy: Schema.Types.ObjectId,
     relatedUsers: [{ type: Schema.Types.ObjectId, ref: 'User'}],
-    isRepeatable: Boolean,
     isUsingSteps: Boolean,
-    isSequential: Boolean,
     steps: [{ 
         order: Number,
         description: String
-    }], 
-    schedule: [alertSchema],
+    }],
+    isRepeatable: Boolean,
+    schedule: [],
+    isRepeatActive: Boolean,
+    instances: [{ type: Schema.Types.ObjectId, ref: 'Task'}],
     images: [],
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment'}],
     lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' } 
@@ -42,7 +33,7 @@ const taskSchema = new Schema({
 taskSchema.pre('save', async function(next) {
     let task = this;
     let newValue = await incrementCounter('tasks');
-    task.taskId = 'TSK-' + newValue.currentValue;
+    task.taskId = (task.isRepeatable ? 'RTSK-' : 'TSK-') + newValue.currentValue;
     next();
 })
 

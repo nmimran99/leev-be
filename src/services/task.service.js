@@ -57,16 +57,7 @@ export const getTask = async (req) => {
 };
 
 export const createTask = async (req) => {
-	// let images = [];
 
-	// if (req.files.length) {
-	// 	req.files.forEach((f) => {
-	// 		console.log(f);
-	// 		images.push(f.filename);
-	// 	});
-	// }
-
-	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
 	const {
 		title,
 		description,
@@ -78,9 +69,10 @@ export const createTask = async (req) => {
 		isUsingSteps,
 		isSequential,
 		isRepeatable,
-		schedule,
 		createdBy,
 	} = req.body;
+
+	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
 
 	const task = new Task({
 		tenant: req.user.tenant,
@@ -94,21 +86,16 @@ export const createTask = async (req) => {
 		isUsingSteps,
 		isSequential,
 		isRepeatable,
-		schedule: JSON.parse(schedule),
+		schedule: [],
+		isRepeatActive: false,
+		instances: [],
 		createdBy,
 		status: initStatus,
 		images: [],
+		comments: []
 	});
 
 	let savedTask = await task.save();
-
-	// if (!savedTask.images.length) return savedTask;
-	// await Promise.all(
-	// 	savedTask.images.map(async (image, index) => {
-	// 		let newURL = await relocateFile(image, savedTask._id, 'tasks');
-	// 		savedTask.images[index] = newURL;
-	// 	})
-	// );
 
 	const urls = await uploadImagesToBlob(req.files);
 
@@ -129,8 +116,6 @@ export const updateTask = async (req) => {
 		owner,
 		steps,
 		isUsingSteps,
-		isSequntial,
-		isRepeatable,
 		uploadedImages,
 	} = req.body;
 
@@ -145,27 +130,6 @@ export const updateTask = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	// let prepImages = [];
-	// let images = [];
-	// if (req.files.length) {
-	// 	req.files.forEach((f) => {
-	// 		images.push(f.filename);
-	// 	});
-
-	// 	await Promise.all(
-	// 		images.map(async (image, index) => {
-	// 			let newURL = await relocateFile(image, _id, 'tasks');
-	// 			prepImages[index] = newURL;
-	// 		})
-	// 	);
-	// }
-
-	// removeUnlistedImages(
-	// 	[...prepImages, ...JSON.parse(uploadedImages)],
-	// 	'tasks',
-	// 	_id
-	// );
-
 	const urls = await uploadImagesToBlob(req.files);
 
 	return await Task.findOneAndUpdate(
@@ -178,8 +142,6 @@ export const updateTask = async (req) => {
 			owner,
 			steps: JSON.parse(steps),
 			isUsingSteps,
-			isSequntial,
-			isRepeatable,
 			images: [...urls, ...JSON.parse(uploadedImages)],
 			lastUpdatedBy: req.user._id
 		},
@@ -226,6 +188,7 @@ export const getTasks = async (req) => {
 		...getTasksQueryParams(filters),
 		...getRelatedQuery(permLevel, userId),
 	};
+
 	return Task.find({ tenant: tenant, ...addQuery }).populate([
 		{ path: 'asset' },
 		{ path: 'system' },
@@ -442,7 +405,7 @@ export const getTasksQueryParams = (query) => {
 	delete query.sortOrder;
 
 	Object.entries(query).forEach((entry) => {
-		if (!entry[1]) {
+		if (entry[1] === null || entry[1] === undefined) {
 			delete query[entry[0]];
 		}
 	});
@@ -470,7 +433,7 @@ export const updateTaskSchedule = async (req) => {
 
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ schedule, lastUpdatedBy: req.user._id },
+		{ schedule, lastUpdatedBy: req.user._id, isRepeatActive: Boolean(schedule.length) },
 		{ new: true, useFindAndModify: false }
 	);
 };
