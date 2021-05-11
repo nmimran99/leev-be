@@ -79,7 +79,7 @@ app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
 
 mongoose.connect(
-	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/leevdb?retryWrites=true&w=majority`,
+	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/${process.env.DB_NAME || 'leevdb'}?retryWrites=true&w=majority`,
 	{ useNewUrlParser: true, useUnifiedTopology: true }
 );
 
