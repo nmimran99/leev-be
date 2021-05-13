@@ -36,10 +36,15 @@ export const createFault = async (req) => {
 	let assetData = await Asset.findOne({ _id: asset }, 'tenant owner');
 	let systemData = await System.findOne({ _id: system }, 'owner');
 
+	
 	let relatedUsersArr = [];
 	if (assetData) relatedUsersArr.push(assetData.owner);
 	if (systemData) relatedUsersArr.push(systemData.owner);
 	relatedUsersArr = relatedUsersArr.filter((v) => v.toString() !== owner);
+
+	if (!createdBy) {
+		createdBy = systemData.owner;
+	}
 
 	let fault = new Fault({
 		tenant: req.user ? req.user.tenant : assetData.tenant,
@@ -50,8 +55,8 @@ export const createFault = async (req) => {
 		owner: owner || systemData.owner,
 		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
-		createdBy: createdBy || systemData.owner,
-		lastUpdatedBy: createdBy || systemData.owner,
+		createdBy: systemData.owner,
+		lastUpdatedBy: systemData.owner,
 		images: [],
 		comments: [],
 	});
@@ -309,7 +314,7 @@ export const getFaults = async (req) => {
 		...getRelatedQuery(permLevel, userId),
 	};
 
-	const faults = await Fault.find({ tenant: tenant, ...addQuery }).populate([
+	const faults = await Fault.find({ tenant: tenant, ...addQuery }).sort({ createdAt: -1 }).populate([
 		{
 			path: 'owner',
 			select: 'firstName lastName phoneNumber avatar role',

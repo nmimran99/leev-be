@@ -6,7 +6,7 @@
 
     <style type="text/css">
    
-         * {
+        * {
             color: black;
         }
         
@@ -42,10 +42,9 @@
             place-items: center;
             border: 1px solid rgba(0,0,0,0.2);
             font-size: 20px;
-            padding: 5px 20px;
+            padding: 0px 20px 5px;
             border-radius: 50px;
-            margin: 25px auto;
-            line-height: 1.8;
+            margin: 15px auto;
         }
 
         .fault-success {
@@ -108,42 +107,42 @@
                 class='image' />
         </div>
         <div class='address-container'>
-            {{ address }}
+            some address
         </div>
         <div class='fault-success'>
-            {{ faultCreatedSuccessfully}}
+            fault was succefully created
         </div>
         <div class='fault-intsructions'>
-            {{ faultFollowInstructions }}
+            In order to follow the progress of the fault, please follow the link below
         </div>
         <div class='fault-link'>
-            <a href={{ faultLink }}>
-                {{ faultId }}
+            <a href={{ faultLink }} >
+                FLT-243
             </a>
         </div>
         <div class='details-container'>
             <div class='detail-container'>
                 <div class='detail-label'>
-                    {{ systemLabel }}
+                    System
                 </div>
                 <div class='detail-desc'>
-                    {{ systemData }}
+                    Elevators
                 </div>
             </div>
             <div class='detail-container'>
                 <div class='detail-label'>
-                    {{ titleLabel }}
+                    Title
                 </div>
                 <div class='detail-desc'>
-                    {{ titleData }}
+                    asdasdasdsad
                 </div>
             </div>
             <div class='detail-container'>
                 <div class='detail-label'>
-                    {{ descriptionLabel }}
+                    Description
                 </div>
                 <div class='detail-desc'>
-                    {{ descriptionData }}
+                    asdasdasdasd
                 </div>
             </div>
         </div>
