@@ -199,12 +199,12 @@ export const createEmailOptions = async (n) => {
 			if ( item.system) {
 				context.system = item.system.name;
 				context.systemData = item.system.name;
-				context.systemLabel = t("email.asset")
+				context.systemLabel = t("email.system")
 			}
 			if (item.asset) {
 				context.address = getAddress(item.asset.address).address;
 				context.assetData = getAddress(item.asset.address).address;
-				context.assetLabel = t("email.system");
+				context.assetLabel = t("email.asset");
 			}
 			context.itemId = externalId;
 			context.itemLink = `${process.env.FRONTEND_URL}/${objectType}/${externalId}`;
