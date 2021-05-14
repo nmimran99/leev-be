@@ -2,10 +2,12 @@ import Notification from '../models/notification';
 import User from '../models/user';
 import StatusList from '../models/status';
 import Comment from '../models/comment';
-import Asset from '../models/asset';
 import System from '../models/system';
-import { removeDuplicateObjectIds } from '../api/generic';
-import { get } from 'mongoose';
+import i18next from 'i18next';
+import { getDBModal, removeDuplicateObjectIds, getFullName, getStatusColor } from '../api/generic';
+import { getAddress } from './asset.service';
+import { sendMail } from '../smtp/mail';
+
 
 export const createNotification = async (data) => {
 	if (data.operationType === 'update') {
@@ -132,7 +134,7 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 		tenant: data.fullDocument.tenant,
 		actionType: type,
 		actionOn: {
-			obejctType: data.ns.coll,
+			objectType: data.ns.coll,
 			internalId: data.documentKey._id,
 			externalId: data.fullDocument[`${data.ns.coll.slice(0, -1)}Id`],
 		},
@@ -147,6 +149,7 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 			let n = new Notification({ ...notification, user: distUser });
 			try {
 				await n.save();
+				await sendNotificationEmail(n)
 			} catch (e) {
 				console.log(e.message);
 				return e;
@@ -154,3 +157,92 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 		})
 	);
 };
+
+
+export const sendNotificationEmail = async (n) => {
+	try {
+		const options = await createEmailOptions(n);
+		console.log(n)
+		let d = await sendMail(options);
+		return d;
+	} catch(e) {
+		console.log(e.message)
+		return e.message
+	}
+}
+
+export const createEmailOptions = async (n) => {
+	try {
+		const { objectType, internalId, externalId } = n.actionOn;
+		const Model = await getDBModal(objectType);
+		const user = await User.findOne({ _id: n.user });
+		const actionBy = await User.findOne({ _id: n.actionBy})
+		const t = i18next.getFixedT(user.lang);
+		const item = await Model.findOne(internalId).populate([
+			{ path: 'asset' },
+			{ path: 'system' },
+			{ path: 'status' },
+			{ path: 'owner', populate: {
+					path: 'role',
+					model: 'Role',
+					select: 'roleName',
+				}
+			}
+		]);
+		
+		let context = {};
+		let emailSubject;
+		if ([ 'faults', 'tasks'].includes(objectType)) {
+			context.title = item.title;
+			context.description = item.description;
+			if ( item.system) {
+				context.system = item.system.name;
+			}
+			if (item.asset) {
+				context.address = getAddress(item.asset.address).address;
+			}
+			context.itemId = externalId;
+			context.itemLink = `${process.env.FRONTEND_URL}/${objectType}/${externalId}`;
+			context.avatar = actionBy.avatar
+
+			if (n.actionType === 'statusChange') {
+				context.statusName = t(`statuses.${item.status.statusId}`);
+				context.statusText = `${getFullName(actionBy)} ${t(`email.changeStatusText`)}`;
+				context.statusColor = `background: ${getStatusColor(item.status.statusId)}`
+				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${t(`statuses.${item.status.statusId}`) }`
+			}
+			
+			if (n.actionType === 'ownerChange') {
+				context.ownerName = getFullName(item.owner);
+				context.ownerText = `${getFullName(actionBy)} ${t(`email.changeOwnerText`)}`
+				context.ownerAvatar = item.owner.avatar;
+				context.ownerRole = item.owner.role.roleName
+				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${ getFullName(item.owner) }`
+			}
+
+			if (n.actionType === 'addComment') {
+				context.commentText = `${ getFullName(actionBy)} ${t("email.addCommentText")}`;
+				context.comment = n.data.commentText;
+				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${ getFullName(actionBy) }`
+			}
+
+			if (n.actionType === 'relatedUserAdded') {
+				context.relatedUserAddedText = `${ getFullName(actionBy)} ${t("email.relatedUserAddedText")}`;
+				context.avatar = actionBy.avatar;
+				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${ getFullName(actionBy) }`
+			}
+		}
+
+		return Promise.resolve({
+			from: 'system@leev.co.il',
+			to: user.email,
+			subject: emailSubject,
+			template: n.actionType,
+			context
+		});
+	} catch(e) {
+		console.log(e.message);
+		return null;
+	}	
+}
+

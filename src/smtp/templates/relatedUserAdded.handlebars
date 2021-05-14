@@ -6,7 +6,7 @@
 
     <style type="text/css">
    
-        * {
+         * {
             color: black;
         }
         
@@ -46,7 +46,6 @@
             padding: 20px;
             border-radius: 20px;
             background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
         }
 
@@ -89,8 +88,8 @@
         }
 
         .avatar {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
             border-radius: 50%;
         }
@@ -120,57 +119,19 @@
             border-width: 1px 0;
         }
 
-        .add-info {
-            padding: 10px;
-            margin: 0px auto;
-        }
-
-        .add-container {
-            margin: 8px auto;
-            text-align: center;
-            box-shadow: 
-                rgba(0,0,0,0.2) 1px 1px 1px 0px,
-                rgba(255,255,255,0.2) -1px -1px 1px 0px;
-            padding: 7px 0;
-            border-radius: 50px;
-            font-size: 16px;
-            width: auto;
-        }
-
-        .owner-avatar {
-            height: 100px;
-        }
-
-        .owner-container {
+        .comment-container {
             display: flex;
-           
-            border-radius: 100px;
-            padding: 8px 30px 8px 8px;
+            width: auto;
+            border-radius: 20px;
+            padding: 10px;
             margin: 5px auto 10px;
             width: fit-content;
             box-shadow: 
                 rgba(0,0,0,0.2) 1px 1px 1px 0px,
                 rgba(255,255,255,0.2) -1px -1px 1px 0px;
-            background: rgba(255,255,255,0.4)
-        }
-
-        img.owner_image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .owner-details {
-            padding: 20px 15px;
-        }
-
-        .owner-name {
-            font-size: 22px;
-        }
-
-        .owner-role {
-            font-size: 14px;
+            background: rgba(255,255,255,0.4);
+            text-align: center;
+            font-size: 18px;
         }
 
 
@@ -185,60 +146,26 @@
                 class='image' />
         </div>
         <div class='container'>
-            
             <div class='item-link'>
                 <div class='item-id'>
-                    <a href='http://10.0.0.195:3000/workspace/faults/FLT-343' >
-                        FLT-343
+                    <a href={{ itemLink }} >
+                        {{ itemId }}
                     </a>
                 </div>
                 <div class='title'>
-                   some title here
+                {{ title }}
                 </div>
             </div>
             <div class='data-container'>
                 <div class='avatar-container'>
-                    <img src='https://leevstore.blob.core.windows.net/images/image1620190968582_avatar_1620190968497.jpg' class='avatar' />
+                    <img src={{ avatar }} class='avatar' />
                 </div>
                 <div class='text-static'>
-                    Niv Mimran has commneted
+                    {{ relatedUserAddedText }}
                 </div>
-                <div class='owner-container'>
-                    <div class='owner-avatar'>
-                        <img src='https://leevstore.blob.core.windows.net/images/image1620190968582_avatar_1620190968497.jpg' class='owner_image' />
-                    </div>
-                    <div class='owner-details'>
-                        <div class='owner-name'>
-                            Niv Mimran
-                        </div>
-                        <div class='owner-role'>
-                            System Administrator
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class='add-info'>
-                <div class='add-container'>
-                    211 Howard Park Ave, Toronto
-                </div>
-                <div class='add-container'>
-                    Elevators
-                </div>
-      
-                <!-- {{#if address}}
-                <div class='add-container'>
-                    {{ address }}
-                </div>
-                {{/if}}
-                {{#if system}}
-                <div class='add-container'>
-                    {{ system }}
-                </div>
-                {{/if}} -->
             </div>
         </div>
-    </div>
-   
+     </div>
 </body>
 
 </html>

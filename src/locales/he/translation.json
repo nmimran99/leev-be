@@ -5,6 +5,21 @@
         "system": "מערכת",
         "faultTitle": "כותרת תקלה",
         "faultDescription": "תיאור תקלה",
-        "faultAssignEmailSubject": "Leev - תקלה נפתחה בהצלחה"
+        "faultAssignEmailSubject": "Leev - תקלה נפתחה בהצלחה",
+        "changeStatusText": "שינה את הסטטוס",
+        "statusChangeSubject": "Leev - סטטוס השתנה",
+        "changeOwnerText": "שינה את ממונה התקלה",
+        "ownerChangeSubject": " Leev - שינוי ממונה",
+        "addCommentText": "הגיב/ה",
+        "addCommentSubject": "הוספת תגובה",
+        "relatedUserAddedText": "הוסיפ/ה אותך לפריט זה כמשתמש מקושר",
+        "relatedUserAddedSubject": "קישור לפריט"
+
+    },
+    "statuses" : {
+        "ready": "מוכן לביצוע",
+        "inProgress": "בביצוע",
+        "pending": "ממתין לפעולה", 
+        "closed": "סגור"
     }
 }

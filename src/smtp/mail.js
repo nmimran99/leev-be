@@ -43,17 +43,6 @@ export const createMailTransporter = async () => {
                     pass: process.env.MAIL_PASS
                 }
             });
-            
-            const handlebarOptions = {
-                viewEngine: {
-                  extName: '.hbs',
-                  partialsDir: 'views',//your path, views is a folder inside the source folder
-                  layoutsDir: 'views',
-                  defaultLayout: ''//set this one empty and provide your template below,
-                },
-                viewPath: 'views',
-                extName: '.hbs',
-              };
 
             transport.use('compile', hbs({
                 viewEngine: {

@@ -1,5 +1,15 @@
 import fs from 'fs';
+import mongoose from 'mongoose';
 import path from 'path';
+import User from '../models/user';
+import Fault from '../models/fault';
+import System from '../models/system';
+import Asset from '../models/asset';
+import Document from '../models/document';
+import Task from '../models/task';
+import Comment from '../models/comment';
+import Role from '../models/role'
+
 
 
 
@@ -92,4 +102,36 @@ export const getUnauthorizedMessage = () => {
 
 export const createURL = async (fileName) => {
     return `${process.env.BLOB_IMAGES_URL}/${fileName}`
+}
+
+export const getDBModal = (model) => {
+    return new Promise((resolve, reject) => {
+        const ms = {
+            faults: Fault,
+            tasks: Task,
+            assets: Asset,
+            documents: Document,
+            users: User,
+            roles: Role,
+            comments: Comment,
+            systems: System
+        };
+
+        resolve(ms[model]);
+    }) 
+}
+
+export const getFullName = (user) => {
+	return `${user.firstName} ${user.lastName}`;
+};
+
+export const getStatusColor = (statusId) => {
+    const st = {
+        ready: '#e53935;',
+        inProgress: '#ffeb3b',
+        pending: 'rgba(255,255,255,0.4)',
+        closed: '#2e7d32'
+    }
+    
+    return st[statusId];
 }

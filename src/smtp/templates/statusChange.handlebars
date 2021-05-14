@@ -13,19 +13,26 @@
         div {
             font-family: system-ui;
         }
-
         .outer-container {
             width: 375px;
             
         }
 
-       .main-container {
+    .main-container {
         background: url('https://leevstore.blob.core.windows.net/images/mailbackground.jpg');
         border-radius: 20px;
         padding: 10px;
        }
 
-        .image-container {
+        .container {
+            height: fit-content;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.2);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+       .image-container {
             width: 100%;
             height: fit-content;
             display: flex;
@@ -41,25 +48,33 @@
             margin: 0 auto;
         }
 
-        .container {
-            height: fit-content;
-            padding: 20px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-
         .address-container {
             width: fit-content;
             height: 40px;
             display: grid;
             place-items: center;
             border: 1px solid rgba(0,0,0,0.2);
-            font-size: 16px;
+            font-size: 20px;
             padding: 0px 20px 5px;
             border-radius: 50px;
             margin: 15px auto;
+        }
+
+        .fault-success {
+            margin: 10px auto;
+            padding: 20px 0 0;
+            text-align: center;
+            line-height: 2;
+            font-size: 18px;
+            border-top: 1px solid rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.4)
+        }
+
+        .fault-intsructions {
+            margin: 10px auto;
+            text-align: center;
+            line-height: 2;
+            font-size: 16px
         }
 
         .item-link {
@@ -68,9 +83,7 @@
             padding: 9px 30px;
             border-radius: 50px;
             width: fit-content;
-            box-shadow: 
-                rgba(0,0,0,0.4) 1px 1px 1px 0px,
-                rgba(255,255,255,0.2) -1px -1px 1px 0px;
+            border: 1px solid rgba(0,0,0,0.2);
             background: rgba(255,255,255,0.4)
         }
 
@@ -85,24 +98,21 @@
         .avatar-container {
             width: fit-content;
             margin: 10px auto;
-            
         }
 
         .avatar {
-            width: 60px;
-            height: 60px;
+            width: 100px;
+            height: 100px;
             object-fit: cover;
             border-radius: 50%;
         }
 
         .text-static {
             text-align: center;
-            padding: 10px 20px;
+            padding: 10px 0;
             font-size: 16px;
             background: rgba(255,255,255,0.4);
             border-radius: 50px;
-            margin: 20px auto;
-
         }
 
         .status-name {
@@ -110,8 +120,9 @@
             padding: 7px 30px;
             border-radius: 50px;
             font-size: 20px;
-            margin: 0px auto 10px;
+            margin: 10px auto;
             border: 1px solid rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.4)
         }
 
         .data-container {
@@ -125,55 +136,16 @@
             margin: 0px auto;
         }
 
-        .add-container {
+       .add-container {
             margin: 8px auto;
             text-align: center;
-            box-shadow: 
-                rgba(0,0,0,0.2) 1px 1px 1px 0px,
-                rgba(255,255,255,0.2) -1px -1px 1px 0px;
+            background: rgba(255,255,255,0.4);
             padding: 7px 0;
             border-radius: 50px;
             font-size: 16px;
             width: auto;
+            font-weight: 500;
         }
-
-        .owner-avatar {
-            height: 100px;
-        }
-
-        .owner-container {
-            display: flex;
-           
-            border-radius: 100px;
-            padding: 8px 30px 8px 8px;
-            margin: 5px auto 10px;
-            width: fit-content;
-            box-shadow: 
-                rgba(0,0,0,0.2) 1px 1px 1px 0px,
-                rgba(255,255,255,0.2) -1px -1px 1px 0px;
-            background: rgba(255,255,255,0.4)
-        }
-
-        img.owner_image {
-            width: 100px;
-            height: 100px;
-            object-fit: cover;
-            border-radius: 50%;
-        }
-
-        .owner-details {
-            padding: 20px 15px;
-        }
-
-        .owner-name {
-            font-size: 22px;
-        }
-
-        .owner-role {
-            font-size: 14px;
-        }
-
-
 
     </style>
 </head>
@@ -185,47 +157,29 @@
                 class='image' />
         </div>
         <div class='container'>
-            
             <div class='item-link'>
                 <div class='item-id'>
-                    <a href='http://10.0.0.195:3000/workspace/faults/FLT-343' >
-                        FLT-343
+                    <a href={{ itemLink }} >
+                        {{ itemId }}
                     </a>
                 </div>
                 <div class='title'>
-                   some title here
+                    {{ title }}
                 </div>
             </div>
             <div class='data-container'>
                 <div class='avatar-container'>
-                    <img src='https://leevstore.blob.core.windows.net/images/image1620190968582_avatar_1620190968497.jpg' class='avatar' />
+                    <img src={{ avatar }} class='avatar' />
                 </div>
                 <div class='text-static'>
-                    Niv Mimran has commneted
+                    {{ statusText }}
                 </div>
-                <div class='owner-container'>
-                    <div class='owner-avatar'>
-                        <img src='https://leevstore.blob.core.windows.net/images/image1620190968582_avatar_1620190968497.jpg' class='owner_image' />
-                    </div>
-                    <div class='owner-details'>
-                        <div class='owner-name'>
-                            Niv Mimran
-                        </div>
-                        <div class='owner-role'>
-                            System Administrator
-                        </div>
-                    </div>
+                <div class='status-name'>
+                    {{ statusName}}
                 </div>
             </div>
             <div class='add-info'>
-                <div class='add-container'>
-                    211 Howard Park Ave, Toronto
-                </div>
-                <div class='add-container'>
-                    Elevators
-                </div>
-      
-                <!-- {{#if address}}
+                {{#if address}}
                 <div class='add-container'>
                     {{ address }}
                 </div>
@@ -234,11 +188,11 @@
                 <div class='add-container'>
                     {{ system }}
                 </div>
-                {{/if}} -->
+                {{/if}}
             </div>
         </div>
     </div>
-   
+    
 </body>
 
 </html>
