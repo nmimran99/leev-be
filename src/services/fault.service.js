@@ -543,7 +543,7 @@ export const notifyUserAssigned = async (user, fault) => {
 			let d = await sendMail({
 			from: 'system@leev.co.il',
 			to: user.email,
-			subject: t("email.faultAssignEmailSubject"),
+			subject: t("email.faultsAssignEmailSubject"),
 			template: 'userassigned',
 			context: {
 				address: getAddress(fault.asset.address).address,
@@ -553,9 +553,9 @@ export const notifyUserAssigned = async (user, fault) => {
 				faultLink: `http://www.leev.co.il/workspace/faults/${fault.faultId}`,
 				systemLabel: t("email.system"),
 				systemData: fault.system.name,
-				titleLabel: t("email.faultTitle"),
+				titleLabel: t("email.faultsTitle"),
 				titleData: fault.title,
-				descriptionLabel: t("email.faultDescription"),
+				descriptionLabel: t("email.faultsDescription"),
 				descriptionData: fault.description,
 				lang: user.lang === 'he' ? 'rtl' : 'ltr'
 			}

@@ -2,10 +2,14 @@
     "email": {
         "faultCreatedSuccessfully": "תקלה נוצרה בהצלחה",
         "faultFollowInstructions": "על מנת לעקוב אחר התקדמות הטיפול בתקלה, אנא לחץ על הלינק הבא",
+        "asset": "נכס",
         "system": "מערכת",
-        "faultTitle": "כותרת תקלה",
-        "faultDescription": "תיאור תקלה",
-        "faultAssignEmailSubject": "Leev - תקלה נפתחה בהצלחה",
+        "tasksTitle": "כותרת משימה",
+        "faultsTitle": "כותרת תקלה",
+        "faultsDescription": "תיאור תקלה",
+        "tasksDescription": "תיאור משימה",
+        "faultsAssignEmailSubject": "Leev - תקלה נפתחה בהצלחה",
+        "tasksAssignEmailSubject": "Leev - משימה נפתחה בהצלחה",
         "changeStatusText": "שינה את הסטטוס",
         "statusChangeSubject": "Leev - סטטוס השתנה",
         "changeOwnerText": "שינה את ממונה התקלה",
@@ -13,8 +17,11 @@
         "addCommentText": "הגיב/ה",
         "addCommentSubject": "הוספת תגובה",
         "relatedUserAddedText": "הוסיפ/ה אותך לפריט זה כמשתמש מקושר",
-        "relatedUserAddedSubject": "קישור לפריט"
-
+        "relatedUserAddedSubject": "קישור לפריט",
+        "faultsCreatedSuccessfulyText": "יצר/ה תקלה חדשה",
+        "tasksCreatedSuccessfulyText": "יצר/ה משימה חדשה",
+        "itemCreatedSuccessfulyInstructions": "על מנת לעקוב אחר התקדמות פריט זה, אנא לחצ/י על הלינק הבא"
+        
     },
     "statuses" : {
         "ready": "מוכן לביצוע",

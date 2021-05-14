@@ -126,7 +126,8 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 	const actionBy = data.updateDescription
 		? data.updateDescription.updatedFields.lastUpdatedBy ||
 		  data.fullDocument.lastUpdatedBy
-		: data.fullDocument.lastUpdatedBy;
+		: data.fullDocument.createdBy;
+		console.log(data)
 	const distributionList = await getDistributionList(data, type, actionBy);
 
 	if (!distributionList) return;
@@ -197,9 +198,13 @@ export const createEmailOptions = async (n) => {
 			context.description = item.description;
 			if ( item.system) {
 				context.system = item.system.name;
+				context.systemData = item.system.name;
+				context.systemLabel = t("email.asset")
 			}
 			if (item.asset) {
 				context.address = getAddress(item.asset.address).address;
+				context.assetData = getAddress(item.asset.address).address;
+				context.assetLabel = t("email.system");
 			}
 			context.itemId = externalId;
 			context.itemLink = `${process.env.FRONTEND_URL}/${objectType}/${externalId}`;
@@ -212,7 +217,7 @@ export const createEmailOptions = async (n) => {
 				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${t(`statuses.${item.status.statusId}`) }`
 			}
 			
-			if (n.actionType === 'ownerChange') {
+			if (n.actionType === 'ownerChange' || 'itemCreated') {
 				context.ownerName = getFullName(item.owner);
 				context.ownerText = `${getFullName(actionBy)} ${t(`email.changeOwnerText`)}`
 				context.ownerAvatar = item.owner.avatar;
@@ -230,6 +235,16 @@ export const createEmailOptions = async (n) => {
 				context.relatedUserAddedText = `${ getFullName(actionBy)} ${t("email.relatedUserAddedText")}`;
 				context.avatar = actionBy.avatar;
 				emailSubject = `${externalId} -  ${t(`email.${n.actionType}Subject`)} - ${ getFullName(actionBy) }`
+			}
+
+			if (n.actionType === 'itemCreated') {
+				context.titleLabel = t(`email.${objectType}Title`);
+				context.titleData = item.title;
+				context.descriptionLabel = t(`email.${objectType}Description`)
+				context.descriptionData = item.description;
+				context.itemCreatedSuccessfulyText = `${getFullName(actionBy)}  ${t(`email.${objectType}CreatedSuccessfulyText`)}`;
+				context.itemCreatedSuccessfulyInstructions = t("email.itemCreatedSuccessfulyInstructions")
+				emailSubject = `${externalId} -  ${t(`email.${objectType}AssignEmailSubject`)}`
 			}
 		}
 
