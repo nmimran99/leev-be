@@ -94,7 +94,7 @@ export const addRelatedUsers = async (req) => {
 
 export const addRelatedUser = async (req) => {
 	const { systemId, userId } = req.body;
-	console.log(systemId)
+
 	const isRelated = await isUserRelated(
 		'systems',
 		System,

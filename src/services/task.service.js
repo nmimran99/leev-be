@@ -4,7 +4,7 @@ import Status from '../models/status';
 import Comment from '../models/comment';
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
 import { getUnauthorizedMessage } from '../api/generic';
-import { uploadImagesToBlob } from '../api/blobApi';
+import { uploadFilesToBlob } from '../api/blobApi';
 
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
@@ -53,6 +53,7 @@ export const getTask = async (req) => {
 				select: 'firstName lastName avatar',
 			},
 		},
+		{ path: 'instances' }
 	]);
 };
 
@@ -97,7 +98,7 @@ export const createTask = async (req) => {
 
 	let savedTask = await task.save();
 
-	const urls = await uploadImagesToBlob(req.files);
+	const urls = await uploadFilesToBlob(req.files, 'images');
 
 	return await Task.findOneAndUpdate(
 		{ _id: savedTask._id },
@@ -130,7 +131,7 @@ export const updateTask = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	const urls = await uploadImagesToBlob(req.files);
+	const urls = await uploadFilesToBlob(req.files, 'images');
 
 	return await Task.findOneAndUpdate(
 		{ _id: _id },
@@ -194,6 +195,7 @@ export const getTasks = async (req) => {
 		{ path: 'system' },
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
 		{ path: 'status' },
+		{ path: 'instances' }
 	]);
 };
 

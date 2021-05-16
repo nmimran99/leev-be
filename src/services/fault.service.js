@@ -2,11 +2,11 @@ import Fault from '../models/fault';
 import Comment, { populate } from '../models/comment';
 import Asset from '../models/asset';
 import System from '../models/system';
-import { relocateFile, removeUnlistedImages } from '../api/generic';
+import { removeDuplicateObjectIds } from '../api/generic';
 import Status from '../models/status';
 import { isUserRelated, getRelatedQuery } from '../middleware/authorize';
 import User from '../models/user';
-import { uploadImagesToBlob } from '../api/blobApi';
+import { uploadFilesToBlob } from '../api/blobApi';
 import { getAddress } from './asset.service';
 import i18next from 'i18next';
 import { sendMail } from '../smtp/mail';
@@ -40,10 +40,17 @@ export const createFault = async (req) => {
 	let relatedUsersArr = [];
 	if (assetData) relatedUsersArr.push(assetData.owner);
 	if (systemData) relatedUsersArr.push(systemData.owner);
-	relatedUsersArr = relatedUsersArr.filter((v) => v.toString() !== owner);
+	if (!owner) {
+		owner = systemData.owner
+	}
+	relatedUsersArr = removeDuplicateObjectIds(relatedUsersArr.filter((v) => v.toString() !== owner.toString()));
 
 	if (!createdBy) {
 		createdBy = systemData.owner;
+	}
+
+	if (!title) {
+		title = `${description.substr(0,40)}...`;
 	}
 
 	let fault = new Fault({
@@ -64,7 +71,7 @@ export const createFault = async (req) => {
 	let savedFault = await fault.save();
 	// if (!savedFault.images.length) return savedFault;
 	
-	const urls = await uploadImagesToBlob(req.files)
+	const urls = await uploadFilesToBlob(req.files, 'images')
 	// await Promise.all(
 	// 	savedFault.images.map(async (image, index) => {
 	// 		let newURL = await relocateFile(image, savedFault._id, 'faults');
@@ -244,7 +251,7 @@ export const updateFaultData = async (req) => {
 	// 	_id
 	// );
 
-	const urls = await uploadImagesToBlob(req.files);
+	const urls = await uploadFilesToBlob(req.files, 'images');
 
 	return await Fault.findOneAndUpdate(
 		{ _id: _id },
@@ -292,7 +299,7 @@ export const getMinifiedFaults = async (req) => {
 		...getFaultsQueryParams(filters),
 		...getRelatedQuery(permLevel, user._id),
 	};
-	console.log(addQuery);
+
 	const faults = await Fault.find(query).populate([
 		{
 			path: 'owner',
@@ -539,7 +546,7 @@ export const assignUserToExternalFault = async (req) => {
 export const notifyUserAssigned = async (user, fault) => {
 	try {
 		const t = i18next.getFixedT(user.lang);
-		console.log(fault)
+	
 			let d = await sendMail({
 			from: 'system@leev.co.il',
 			to: user.email,

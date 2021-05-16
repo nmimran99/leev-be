@@ -8,7 +8,7 @@ import { generateAccessToken, authenticate, genereateResetPasswordUrl } from './
 import { sendMail } from '../smtp/mail';
 import { relocateFile } from '../api/generic';
 import { isUserRelated } from '../middleware/authorize';
-import { uploadImagesToBlob } from '../api/blobApi';
+import { uploadFilesToBlob } from '../api/blobApi';
 
 export const registerUser = async (req) => {
 	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role } = req.body;
@@ -23,7 +23,7 @@ export const registerUser = async (req) => {
 		password = 'password';
 	}
 	const hashedPassword = await bcrypt.hash(password, salt);
-	console.log('here');
+
 	let user = new User({
 		tenant,
 		email,
@@ -41,7 +41,7 @@ export const registerUser = async (req) => {
 
 	let savedUser = await user.save();
 	// let newURL = await relocateFile(savedUser.avatar, savedUser._id, 'users');
-	const newURL = await uploadImagesToBlob([req.file]);
+	const newURL = await uploadFilesToBlob([req.file], 'images');
 	savedUser.avatar = newURL[0];
 	return await savedUser.save();
 };
@@ -67,7 +67,7 @@ export const uploadAvatar = async (req) => {
 
 	// let newAvatar = req.file.filename;
 	// let newURL = await relocateFile(newAvatar, userId, 'users');
-	const newURL = await uploadImagesToBlob([req.file]);
+	const newURL = await uploadFilesToBlob([req.file], 'images');
 	return await User.findOneAndUpdate({ _id: userId }, { avatar: newURL[0] }, { new: true });
 };
 
@@ -282,7 +282,7 @@ export const getUsersData = async (req) => {
 
 export const getUserDataById = async (req) => {
     const { userId } = req.body;
-    console.log(req.headers.permLevel)
+  
 	const isRelated = await isUserRelated('users', User, userId, req.user._id, req.headers.permLevel);
 
 	if (!isRelated) {

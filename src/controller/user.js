@@ -71,7 +71,6 @@ export const enableUser = async (req, res) => {
 }
 
 export const loginUser = async (req, res) => {
-    console.log('here')
     try{
         let data = await userService.loginUser(req);
         if (!data) {

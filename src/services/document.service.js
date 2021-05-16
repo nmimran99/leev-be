@@ -1,7 +1,8 @@
-import { relocateFile, removeFile, removeUnlistedImages } from '../api/generic';
+import { removeFile } from '../api/generic';
 import Document from '../models/document';
 import path from 'path';
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
+import { uploadFilesToBlob } from '../api/blobApi';
 
 export const createDocument = async (req) => {
 	const { tenant, _id: createdBy } = req.user;
@@ -17,7 +18,7 @@ export const createDocument = async (req) => {
 
 	let file = req.file.filename;
 
-	let newURL = await relocateFile(file, tenant, 'documents');
+	const newURL = await uploadFilesToBlob([req.file], 'documents');
 
 	const doc = new Document({
 		tenant,
@@ -29,7 +30,7 @@ export const createDocument = async (req) => {
 		user,
 		createdBy,
 		type: path.extname(req.file.filename),
-		url: newURL,
+		url: newURL[0],
 	});
 
 	return await doc.save();
@@ -57,7 +58,7 @@ export const deleteDocument = async (req) => {
 	const { tenant, documentId } = req.body;
 	const doc = await Document.findOne({ _id: documentId });
 	if (!doc) return;
-	await removeFile('documents', tenant, path.basename(doc.url));
+	await removeFileFromBlob(doc.url);
 	return await Document.findOneAndDelete(
 		{ _id: documentId },
 		{ useFindAndModify: false }
@@ -98,7 +99,7 @@ export const updateDocumentDetails = async (req) => {
 	if (!isRelated) {
 		return { error: true, reason: 'unauthorized', status: 403 };
 	}
-	console.log(details)
+
 	const updated = getDocmentsQueryParams(details);
 	return await Document.findOneAndUpdate({ _id: details._id }, { ...updated }, { new: true, useFindAndModify: false}).populate([
 		{ path: 'asset', select: 'address' },

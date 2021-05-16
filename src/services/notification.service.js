@@ -127,7 +127,6 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 		? data.updateDescription.updatedFields.lastUpdatedBy ||
 		  data.fullDocument.lastUpdatedBy
 		: data.fullDocument.createdBy;
-		console.log(data)
 	const distributionList = await getDistributionList(data, type, actionBy);
 
 	if (!distributionList) return;
@@ -163,7 +162,6 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 export const sendNotificationEmail = async (n) => {
 	try {
 		const options = await createEmailOptions(n);
-		console.log(n)
 		let d = await sendMail(options);
 		return d;
 	} catch(e) {
