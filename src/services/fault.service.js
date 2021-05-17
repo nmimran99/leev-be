@@ -64,7 +64,7 @@ export const createFault = async (req) => {
 		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
 		createdBy,
-		lastUpdatedBy: systemData.owner,
+		lastUpdatedBy: createdBy,
 		images: [],
 		comments: [],
 	});
