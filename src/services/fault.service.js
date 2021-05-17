@@ -24,7 +24,11 @@ export const createFault = async (req) => {
 		relatedUsers
 	} = req.body;
 
-	const { _id: createdBy } = req.user;
+	let createdBy = null;
+	if (req.user) {
+		createdBy = req.user._id
+	}
+
 	let images = [];
 
 	// if (req.files.length) {
