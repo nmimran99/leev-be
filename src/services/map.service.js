@@ -37,5 +37,5 @@ export const getMapFaults = async (req) => {
 
 export const getMapTasks = async (req) => { 
 	const statusList = await StatusList.find({ module:'tasks', state: { $ne: 'close'}})
-	return await getTasks(req, { status: statusList });
+	return await getTasks(req, { status: statusList, isRepeatable: false });
 } 
