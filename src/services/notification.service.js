@@ -205,7 +205,7 @@ export const createEmailOptions = async (n) => {
 				context.assetLabel = t("email.asset");
 			}
 			context.itemId = externalId;
-			context.itemLink = `${process.env.FRONTEND_URL}/${objectType}/${externalId}`;
+			context.itemLink = `${process.env.FRONTEND_URL}/workspace/${objectType}/${externalId}`;
 			context.avatar = actionBy.avatar
 
 			if (n.actionType === 'statusChange') {
