@@ -2,6 +2,7 @@ import { getStatusIds, getStatusList } from './status.service';
 import { getAssets } from './asset.service';
 import { getFaults } from './fault.service';
 import { getTasks } from './task.service';
+import StatusList from '../models/status'
 
 export const getMapData = async (req) => {
 	try {
@@ -30,9 +31,11 @@ export const getMapAssets = async (req) => {
 } 
 
 export const getMapFaults = async (req) => {
-	return await getFaults(req);
+	const statusList = await StatusList.find({ module:'faults', state: { $ne: 'close'}})
+	return await getFaults(req, { status: statusList });
 }  
 
 export const getMapTasks = async (req) => { 
-	return await getTasks(req);
+	const statusList = await StatusList.find({ module:'tasks', state: { $ne: 'close'}})
+	return await getTasks(req, { status: statusList });
 } 

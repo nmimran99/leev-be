@@ -311,13 +311,13 @@ export const getMinifiedFaults = async (req) => {
 	return Promise.resolve(faults);
 };
 
-export const getFaults = async (req) => {
+export const getFaults = async (req, additionalFilters) => {
 	const { tenant, _id: userId } = req.user;
 	const { filters } = req.body;
 	const { permLevel } = req.headers;
 
 	let addQuery = {
-		...getFaultsQueryParams(filters),
+		...getFaultsQueryParams({ ...filters, ...additionalFilters}),
 		...getRelatedQuery(permLevel, userId),
 	};
 

@@ -5,6 +5,7 @@ const tenantSchema = new Schema({
     name: String,
     contactName: String,
     contactNumber: String,
+    lang: String
 }, {
     timestamps: true
 });

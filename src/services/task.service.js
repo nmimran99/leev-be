@@ -180,13 +180,13 @@ export const deleteTask = async (req) => {
 	);
 };
 
-export const getTasks = async (req) => {
+export const getTasks = async (req, additionalFilters) => {
 	const { tenant, _id: userId } = req.user;
 	const { filters } = req.body;
 	const { permLevel } = req.headers;
 
 	const addQuery = {
-		...getTasksQueryParams(filters),
+		...getTasksQueryParams({ ...filters, ...additionalFilters}),
 		...getRelatedQuery(permLevel, userId),
 	};
 

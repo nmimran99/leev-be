@@ -11,7 +11,7 @@ import { isUserRelated } from '../middleware/authorize';
 import { uploadFilesToBlob } from '../api/blobApi';
 
 export const registerUser = async (req) => {
-	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role } = req.body;
+	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang } = req.body;
 	const { tenant, _id: createdBy } = req.user;
 	let errors = await checkUnique(req);
 	if (errors.email) {
@@ -37,6 +37,7 @@ export const registerUser = async (req) => {
 		avatar: req.file ? req.file.filename : null,
 		role,
 		changePasswordOnFirstLogin: true,
+		lang
 	});
 
 	let savedUser = await user.save();
@@ -148,7 +149,7 @@ export const reloginUser = async (req) => {
 	}
 	const user = await User.findOne(
 		{ _id: decodedToken.id },
-		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role'
+		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role lang'
 	).populate('role');
 	return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
 		if (!user) return { auth: false, message: 'user token not linked to a user', user: null, token: null };

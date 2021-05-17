@@ -1,10 +1,32 @@
 {
     "email": {
-        "faultCreatedSuccessfully": "You have succesfully cretaed a fault.",
-        "faultFollowInstructions": "In order to follow the progress of the fault, please follow the link below",
+        "faultCreatedSuccessfully": "Fault was successfully created",
+        "faultFollowInstructions": "To get an update on the progress of the fault, please click on the link below",
+        "asset": "Asset",
         "system": "System",
-        "faultTitle": "Title",
-        "faultDescription": "Description",
-        "faultAssignEmailSubject": "Leev - Fault created successfully"
+        "tasksTitle": "Task title",
+        "faultsTitle": "Fault title",
+        "faultsDescription": "Fault Description",
+        "tasksDescription": "Task Description",
+        "faultsAssignEmailSubject": "Leev - Fault created successfully",
+        "tasksAssignEmailSubject": "Leev - Task created successfully",
+        "changeStatusText": "changed the status",
+        "statusChangeSubject": "Leev - Status Changed",
+        "changeOwnerText": "changed the fault owner",
+        "ownerChangeSubject": " Leev - Owner Changed",
+        "addCommentText": "Commented",
+        "addCommentSubject": "Comment Added",
+        "relatedUserAddedText": "Related you to this item",
+        "relatedUserAddedSubject": "Added as Related",
+        "faultsCreatedSuccessfulyText": "created a new Fault",
+        "tasksCreatedSuccessfulyText": "created a new Task",
+        "itemCreatedSuccessfulyInstructions": "To get an update on the progress of the fault, please click on the link below"
+        
+    },
+    "statuses" : {
+        "ready": "Ready",
+        "inProgress": "In Progress",
+        "pending": "Pending", 
+        "closed": "Closed"
     }
 }
