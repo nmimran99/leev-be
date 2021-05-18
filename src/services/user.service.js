@@ -9,6 +9,7 @@ import { sendMail } from '../smtp/mail';
 import { relocateFile } from '../api/generic';
 import { isUserRelated } from '../middleware/authorize';
 import { uploadFilesToBlob } from '../api/blobApi';
+import Tenant from '../models/tenant';
 
 export const registerUser = async (req) => {
 	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang } = req.body;
@@ -22,6 +23,8 @@ export const registerUser = async (req) => {
 	if (!password) {
 		password = 'password';
 	}
+
+	let t = await Tenant.findOne({ _id: tenant });
 	const hashedPassword = await bcrypt.hash(password, salt);
 
 	let user = new User({
@@ -37,7 +40,7 @@ export const registerUser = async (req) => {
 		avatar: req.file ? req.file.filename : null,
 		role,
 		changePasswordOnFirstLogin: true,
-		lang
+		lang: tenant.lang
 	});
 
 	let savedUser = await user.save();
