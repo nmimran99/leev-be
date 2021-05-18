@@ -21,10 +21,10 @@ export const createFault = async (req) => {
 		asset,
 		system,
 		owner,
-		relatedUsers
+		relatedUsers,
+		createdBy
 	} = req.body;
 
-	let createdBy = null;
 	if (req.user) {
 		createdBy = req.user._id
 	}
@@ -51,7 +51,7 @@ export const createFault = async (req) => {
 	relatedUsersArr = removeDuplicateObjectIds(relatedUsersArr.filter((v) => v.toString() !== owner.toString()));
 
 	if (!createdBy) {
-		createdBy = systemData.owner;
+		createdBy = assetData.owner;
 	}
 
 	if (!title) {
@@ -64,7 +64,7 @@ export const createFault = async (req) => {
 		description,
 		asset,
 		system,
-		owner: owner || systemData.owner,
+		owner: owner || assetData.owner,
 		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
 		createdBy,
