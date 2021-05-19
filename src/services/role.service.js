@@ -26,7 +26,7 @@ export const getRole = async (req) => {
     const { permLevel } = req.headers;
 
     if (permLevel === 2) {
-        return await Role.findOne({ _id: roleId }, {});
+        return await Role.findOne({ _id: roleId });
     } else {
         return { error: true, reason: 'unauthorized' };
     }  
