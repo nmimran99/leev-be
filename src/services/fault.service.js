@@ -452,6 +452,7 @@ export const addFaultComment = async (req) => {
 			$push: {
 				comments: comm,
 			},
+			lastUpdatedBy: req.user._id
 		},
 		{
 			new: true,

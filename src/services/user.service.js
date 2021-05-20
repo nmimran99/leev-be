@@ -85,7 +85,7 @@ export const updateUserData = async (req) => {
     }
     
 	return await User.findOneAndUpdate(
-		{ _id, userId },
+		{ _id: userId },
 		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role },
 		{ new: true, useFindAndModify: false }
 	).populate('role');

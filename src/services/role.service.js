@@ -40,12 +40,12 @@ export const getRoles = async (req) => {
 
 export const updateRole = async (req) => {
     const { _id: lastUpdatedBy } = req.user;
-    const { roleId, permissions } = req.body;
+    const { roleId, roleName, permissions } = req.body;
     const { permLevel } = req.headers;
     
     if (permLevel !== 2) {
         return { error: true, reason: 'unauthorized'}
     }
 
-    return await Role.findOneAndUpdate({ _id: roleId }, { permissions, lastUpdatedBy}, { useFindAndModify: false, new: true})
+    return await Role.findOneAndUpdate({ _id: roleId }, { roleName, permissions, lastUpdatedBy}, { useFindAndModify: false, new: true})
 }
