@@ -1,10 +1,11 @@
-import { relocateFile, removeUnlistedImages } from '../api/generic';
+import { getDateParts, relocateFile, removeUnlistedImages } from '../api/generic';
 import Task from '../models/task';
 import Status from '../models/status';
 import Comment from '../models/comment';
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
 import { getUnauthorizedMessage } from '../api/generic';
 import { uploadFilesToBlob } from '../api/blobApi';
+import { parseISO } from 'date-fns';
 
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
@@ -449,3 +450,50 @@ export const getTaskOptions = async (req) => {
 	});
 	return await Task.find({ ...query });
 };
+
+export const syncRepeatableTasks = async () => {
+	console.log('evaluating')
+	const tasks = await Task.find({ isRepeatActive: true, isRepeatable: true });
+	tasks.forEach(task => {
+		task.schedule.forEach(sc => {
+			if (evaluateTaskSchedule(sc)) {
+				createTaskFormTemplate(task);
+			}		
+		})
+	})
+}
+
+export const evaluateTaskSchedule = (schedule) => {
+	const currentDateParts = getDateParts(new Date());
+	const startDateParts = getDateParts(parseISO(schedule.startDate));
+	return (
+		schedule.interval === 'day' ||
+		( schedule.interval === 'week' && currentDateParts.weekDay == startDateParts.weekDay ) ||
+		( schedule.interval === 'month' && currentDateParts.day == startDateParts.day ) ||
+		( schedule.interval === 'year' && currentDateParts.yearDay == startDateParts.yearDay )
+	)
+}
+
+export const createTaskFormTemplate = async (taskTemplate) => {
+	
+	const { tenant, title, description, asset, system, owner, relatedUsers, steps, isUsingSteps, createdBy, images } = taskTemplate;
+	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
+
+	const task = new Task({
+		tenant,
+		title,
+		description,
+		asset,
+		system,
+		owner,
+		relatedUsers,
+		steps,
+		isUsingSteps,
+		createdBy,
+		status: initStatus,
+		images
+	});
+
+	const savedTask = await task.save();
+	await Task.findOneAndUpdate({ _id: taskTemplate._id }, { $push: { instances: savedTask._id } });
+}

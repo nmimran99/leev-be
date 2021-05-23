@@ -22,25 +22,19 @@ export const createFault = async (req) => {
 		system,
 		owner,
 		relatedUsers,
-		createdBy
 	} = req.body;
 
-	if (req.user) {
-		createdBy = req.user._id
-	}
-
-	let images = [];
-
-	// if (req.files.length) {
-	// 	req.files.forEach((f) => {
-	// 		images.push(f.filename);
-	// 	});
-	// }
+	let createdBy = null;
 
 	let initStatus = await Status.findOne({ module: 'faults', order: 1 });
 	let assetData = await Asset.findOne({ _id: asset }, 'tenant owner');
 	let systemData = await System.findOne({ _id: system }, 'owner');
 
+	if (req.user) {
+		createdBy = req.user._id
+	} else {
+		createdBy = assetData.owner;
+	}
 	
 	let relatedUsersArr = [];
 	if (assetData) relatedUsersArr.push(assetData.owner);
@@ -50,9 +44,7 @@ export const createFault = async (req) => {
 	}
 	relatedUsersArr = removeDuplicateObjectIds(relatedUsersArr.filter((v) => v.toString() !== owner.toString()));
 
-	if (!createdBy) {
-		createdBy = assetData.owner;
-	}
+	
 
 	if (!title) {
 		title = `${description.substr(0,40)}...`;
@@ -73,6 +65,7 @@ export const createFault = async (req) => {
 		comments: [],
 	});
 
+	console.log(fault)
 	let savedFault = await fault.save();
 	// if (!savedFault.images.length) return savedFault;
 	

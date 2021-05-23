@@ -9,6 +9,7 @@ import Document from '../models/document';
 import Task from '../models/task';
 import Comment from '../models/comment';
 import Role from '../models/role'
+import { getDate, getDay, getDayOfYear, getMonth, getYear, parseISO } from 'date-fns';
 
 
 
@@ -134,4 +135,14 @@ export const getStatusColor = (statusId) => {
     }
     
     return st[statusId];
+}
+
+export const getDateParts = (date) => {
+    return {
+        day: getDate(date),
+        weekDay: getDay(date),
+        month: getMonth(date),
+        year: getYear(date),
+        yearDay: getDayOfYear(date)
+    }
 }

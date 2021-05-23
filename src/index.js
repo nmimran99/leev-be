@@ -23,6 +23,7 @@ import i18nextMiddleware from 'i18next-express-middleware';
 import Backend from 'i18next-node-fs-backend';
 import en from './locales/en/translation.json';
 import he from './locales/he/translation.json';
+import { syncRepeatableTasks } from './services/task.service';
 global.fetch = require('node-fetch');
 global.crypto = require('crypto');
 global.appRoot = path.resolve(__dirname);
@@ -77,6 +78,8 @@ app.use('/documents', docRoute);
 app.use('/notifications', notificationRoute);
 app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
+
+cron.schedule('00 20 * * *' , syncRepeatableTasks);
 
 mongoose.connect(
 	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/${process.env.DB_NAME || 'leevdb'}?retryWrites=true&w=majority`,
