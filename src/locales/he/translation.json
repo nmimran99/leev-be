@@ -20,6 +20,8 @@
         "relatedUserAddedSubject": "קישור לפריט",
         "faultsCreatedSuccessfulyText": "יצר/ה תקלה חדשה",
         "tasksCreatedSuccessfulyText": "יצר/ה משימה חדשה",
+        "faultsCreatedSuccessfulyTextSystem": "תקלה חדשה נוצרה",
+        "tasksCreatedSuccessfulyTextSystem": "משימה חדשה נוצרה",
         "itemCreatedSuccessfulyInstructions": "על מנת לעקוב אחר התקדמות פריט זה, אנא לחצ/י על הלינק הבא"
         
     },

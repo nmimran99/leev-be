@@ -20,6 +20,7 @@ router.post('/deleteTaskComment',authenticate, authorize, controller.deleteTaskC
 router.post('/updateTaskComment',authenticate, authorize, controller.updateTaskComment);
 router.post('/addRelatedUser',authenticate, authorize, controller.addRelatedUser);
 router.post('/removeRelatedUser',authenticate, authorize, controller.removeRelatedUser);
+router.post('/completeTaskStep',authenticate, authorize, controller.completeTaskStep);
 router.post('/updateTaskSchedule',authenticate, authorize, controller.updateTaskSchedule);
 router.post('/getTaskOptions',authenticate, authorize, controller.getTaskOptions);
 

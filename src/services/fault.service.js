@@ -33,7 +33,8 @@ export const createFault = async (req) => {
 	if (req.user) {
 		createdBy = req.user._id
 	} else {
-		createdBy = assetData.owner;
+		let systemUser = await User.findOne({ email: 'system@leev.co.il'});
+		createdBy = systemUser._id;
 	}
 	
 	let relatedUsersArr = [];
@@ -43,8 +44,6 @@ export const createFault = async (req) => {
 		owner = systemData.owner
 	}
 	relatedUsersArr = removeDuplicateObjectIds(relatedUsersArr.filter((v) => v.toString() !== owner.toString()));
-
-	
 
 	if (!title) {
 		title = `${description.substr(0,40)}...`;

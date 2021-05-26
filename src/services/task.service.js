@@ -68,6 +68,7 @@ export const createTask = async (req) => {
 		owner,
 		relatedUsers,
 		steps,
+		schedule,
 		isUsingSteps,
 		isSequential,
 		isRepeatable,
@@ -88,7 +89,7 @@ export const createTask = async (req) => {
 		isUsingSteps,
 		isSequential,
 		isRepeatable,
-		schedule: [],
+		schedule: schedule ? JSON.parse(schedule) : [],
 		isRepeatActive: false,
 		instances: [],
 		createdBy,
@@ -496,4 +497,29 @@ export const createTaskFormTemplate = async (taskTemplate) => {
 
 	const savedTask = await task.save();
 	await Task.findOneAndUpdate({ _id: taskTemplate._id }, { $push: { instances: savedTask._id } });
+}
+
+export const completeTaskStep = async (req) => {
+	const { taskId, order, isCompleted } = req.body;
+	
+	const isRelated = await isUserRelated(
+		'tasks',
+		Task,
+		taskId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
+	return await Task.findOneAndUpdate({ _id: taskId},
+		{ $set: { "steps.$[el].isCompleted": isCompleted }},
+		{ 
+			arrayFilters: [{ "el.order": order }],
+			new: true,
+			useFindAndModify: false
+		}		
+	
+	)
 }

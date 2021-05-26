@@ -17,7 +17,8 @@ const taskSchema = new Schema({
     isUsingSteps: Boolean,
     steps: [{ 
         order: Number,
-        description: String
+        description: String,
+        isCompleted: Boolean
     }],
     isRepeatable: Boolean,
     schedule: [],

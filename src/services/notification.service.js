@@ -127,6 +127,8 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 		? data.updateDescription.updatedFields.lastUpdatedBy ||
 		  data.fullDocument.lastUpdatedBy
 		: data.fullDocument.createdBy;
+
+	const systemUser = await User.findOne({ email: 'system@leev.co.il' });
 	const distributionList = await getDistributionList(data, type, actionBy);
 
 	if (!distributionList) return;
@@ -145,7 +147,7 @@ export const distributeUpdateNotifications = async (data, type, payload) => {
 
 	return await Promise.all(
 		distributionList.map(async (distUser) => {
-		
+			if (distUser == systemUser._id) return;
 			let n = new Notification({ ...notification, user: distUser });
 			try {
 				await n.save();
@@ -240,7 +242,7 @@ export const createEmailOptions = async (n) => {
 				context.titleData = item.title;
 				context.descriptionLabel = t(`email.${objectType}Description`)
 				context.descriptionData = item.description;
-				context.itemCreatedSuccessfulyText = `${getFullName(actionBy)}  ${t(`email.${objectType}CreatedSuccessfulyText`)}`;
+				context.itemCreatedSuccessfulyText = actionBy.email === 'system@leev.co.il' ? t(`email.${objectType}CreatedSuccessfulyTextSystem`) : `${getFullName(actionBy)}  ${t(`email.${objectType}CreatedSuccessfulyText`)}`;
 				context.itemCreatedSuccessfulyInstructions = t("email.itemCreatedSuccessfulyInstructions")
 				emailSubject = `${externalId} -  ${t(`email.${objectType}AssignEmailSubject`)}`
 			}

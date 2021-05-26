@@ -24,6 +24,7 @@ export const getMinPermLevel = (requesttype) => {
 		changeStatus: 1,
 		changeRelatedUsers: 1,
 		changeSchedule: 1,
+		completeSteps: 1,
 		comment: 1,
 		upload: 2,
 		download: 2,

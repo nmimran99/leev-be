@@ -205,6 +205,22 @@ export const updateTaskSchedule = async (req, res) => {
 	}
 };
 
+export const completeTaskStep = async (req, res) => {
+	try {
+		let data = await taskService.completeTaskStep(req);
+		if (!data) {
+			return res.status(200).send(null);
+		}
+		if (data.error) {
+			return res.status(data.status).send(data.reason);
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		console.log(e.message);
+		return res.status(500).send(e.message);
+	}
+};
+
 export const getTaskOptions = async (req, res) => {
 	try {
 		let data = await taskService.getTaskOptions(req);
