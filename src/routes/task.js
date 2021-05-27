@@ -15,7 +15,7 @@ router.post('/getTask',authenticate, authorize, controller.getTask);
 router.post('/updateTask',authenticate, authorize, uploadTaskImage.array('images', 10), controller.updateTask);
 router.post('/updateTaskOwner',authenticate, authorize, controller.updateTaskOwner);
 router.post('/updateTaskStatus',authenticate, authorize, controller.updateTaskStatus);
-router.post('/addTaskComment',authenticate, authorize, controller.addTaskComment);
+router.post('/addTaskComment',authenticate, authorize, uploadTaskImage.single('image'), controller.addTaskComment);
 router.post('/deleteTaskComment',authenticate, authorize, controller.deleteTaskComment);
 router.post('/updateTaskComment',authenticate, authorize, controller.updateTaskComment);
 router.post('/addRelatedUser',authenticate, authorize, controller.addRelatedUser);

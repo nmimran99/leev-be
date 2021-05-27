@@ -5,6 +5,7 @@ const commentSchema = new Schema({
     parentObject: Schema.Types.ObjectId, 
     user: { type: Schema.Types.ObjectId, ref: 'User'},
     text: String,
+    image: String
 }, {
     timestamps: true
 });

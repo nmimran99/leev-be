@@ -419,6 +419,7 @@ export const getFaultsQueryParams = (query) => {
 
 export const addFaultComment = async (req) => {
 	const { faultId, userId, text } = req.body;
+	let newURL = null;
 
 	const isRelated = await isUserRelated(
 		'faults',
@@ -431,10 +432,15 @@ export const addFaultComment = async (req) => {
 		return { error: true, reason: 'unauthorized', status: 403 };
 	}
 
+	if (req.file) {
+		newURL = await uploadFilesToBlob([req.file], 'images');
+	}
+
 	const comment = new Comment({
 		parentObject: faultId,
 		user: userId,
 		text: text,
+		image: newURL[0]
 	});
 
 	let comm = await comment.save();

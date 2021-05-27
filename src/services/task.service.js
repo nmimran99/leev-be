@@ -245,6 +245,7 @@ export const updateTaskStatus = async (req) => {
 
 export const addTaskComment = async (req) => {
 	const { taskId, userId, text } = req.body;
+	let newURL = null;
 
 	const isRelated = await isUserRelated(
 		'tasks',
@@ -257,10 +258,15 @@ export const addTaskComment = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
+	if (req.file) {
+		newURL = await uploadFilesToBlob([req.file], 'images');
+	}
+
 	const comment = new Comment({
 		parentObject: taskId,
 		user: userId,
 		text: text,
+		image: newURL[0]
 	});
 
 	let comm = await comment.save();

@@ -17,7 +17,7 @@ router.post('/getFaults', authenticate, authorize, controller.getFaults);
 router.post('/addRelatedUser', authenticate, authorize, controller.addRelatedUser);
 router.post('/removeRelatedUser', authenticate, authorize, controller.removeRelatedUser);
 router.post('/getFault', authenticate, authorize, controller.getFault);
-router.post('/addFaultComment', authenticate, authorize, controller.addFaultComment);
+router.post('/addFaultComment', authenticate, authorize, uploadFaultImage.single('image'), controller.addFaultComment);
 router.post('/deleteFaultComment', authenticate, authorize, controller.deleteFaultComment);
 router.post('/updateFaultComment', authenticate, authorize, controller.updateFaultComment);
 router.post('/changeFaultStatus', authenticate, authorize, controller.changeFaultStatus);
