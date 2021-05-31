@@ -72,6 +72,18 @@ export const getAsset = async (req, res) => {
     }  
 }
 
+export const getAssetExtended = async (req, res) => {
+    try{
+        let data = await assetService.getAssetExtended(req);
+        if (data.error) {
+            return res.status(data.status).send(data.reason);
+        }
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    }  
+}
+
 export const removeAsset = async (req, res) => {
     try{
         let data = await assetService.removeAsset(req);
