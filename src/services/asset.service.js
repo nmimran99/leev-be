@@ -158,7 +158,7 @@ export const getAssetExtended = async (req) => {
 	asset.systems = await System.find({ asset: assetId }).populate([
 		{
 			path: "owner",
-			select: "firstName lastName phoneNumber role avatar",
+			select: "_id firstName lastName phoneNumber role avatar",
 			populate: "role",
 		},
 		{
