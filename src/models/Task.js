@@ -33,8 +33,10 @@ const taskSchema = new Schema({
 
 taskSchema.pre('save', async function(next) {
     let task = this;
-    let newValue = await incrementCounter('tasks');
-    task.taskId = (task.isRepeatable ? 'RTSK-' : 'TSK-') + newValue.currentValue;
+    if (!task.taskId) {
+        let newValue = await incrementCounter('tasks');
+        task.taskId = (task.isRepeatable ? 'RTSK-' : 'TSK-') + newValue.currentValue;
+    }
     next();
 })
 

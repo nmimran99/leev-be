@@ -5,6 +5,7 @@ import Task from "../models/task";
 import Fault from "../models/fault";
 import Location from "../models/location";
 import { geoCode } from "./geocoder.service";
+import { getStatusIds } from "./status.service";
 
 export const createAsset = async (req) => {
 	const { tenant, userId, address, owner, type, addInfo } = req.body;
@@ -141,6 +142,11 @@ export const getAssetExtended = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
+	const faultStatuses = await getStatusIds('faults', 'open');
+	const taskStatuses = await getStatusIds('tasks', 'open');
+
+	console.log(taskStatuses)
+
 	let asset = await Asset.findOne({ _id: assetId }).populate([
 		{
 			path: "owner",
@@ -161,7 +167,7 @@ export const getAssetExtended = async (req) => {
 			populate: "role",
 		}
 	]);
-	asset.tasks = await Task.find({ asset: assetId }).populate([
+	asset.tasks = await Task.find({ asset: assetId, status: { $in: taskStatuses } }).populate([
 		{
 			path: "owner",
 			select: "firstName lastName phoneNumber role avatar",
@@ -171,6 +177,25 @@ export const getAssetExtended = async (req) => {
 			path: 'relatedUsers',
 			select: 'firstName lastName phoneNumber role avatar',
 			populate: "role",
+		},
+		{
+			path: 'status'
+		}
+	]);
+	console.log(asset.tasks)
+	asset.faults = await Fault.find({ asset: assetId, status: { $in: faultStatuses } }).populate([
+		{
+			path: "owner",
+			select: "firstName lastName phoneNumber role avatar",
+			populate: "role",
+		},
+		{
+			path: 'relatedUsers',
+			select: 'firstName lastName phoneNumber role avatar',
+			populate: "role",
+		},
+		{
+			path: 'status'
 		}
 	]);
 	asset.locations = await Location.find({ asset: assetId }).populate([
@@ -181,6 +206,7 @@ export const getAssetExtended = async (req) => {
 		}
 	]);
 
+	
 	return asset;
 };
 
@@ -221,3 +247,7 @@ export const getAssetExternal = async (req) => {
 		return { error: true, reason: "asset or systems not found", status: 200 };
 	}
 };
+export const checkAssetOwnership = async (userId) => {
+	const arr = await Asset.find({ owner: userId });
+	return Boolean(arr.length);
+}

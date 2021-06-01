@@ -17,7 +17,7 @@ router.post('/loginUser', controller.loginUser);
 router.post('/reloginUser', controller.reloginUser);
 router.post('/disableUser', controller.disableUser);
 router.post('/enableUser', controller.enableUser);
-router.post('/deleteUser', controller.deleteUser);
+router.post('/deactivateUser', controller.deactivateUser);
 router.post('/resetPasswordLink', controller.resetPasswordLink);
 router.post('/setNewPassword', controller.setNewPassword);
 router.post('/authorizeSetNewPassword', controller.authorizeSetNewPassword);

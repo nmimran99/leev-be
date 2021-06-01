@@ -8,8 +8,11 @@ import { generateAccessToken, authenticate, genereateResetPasswordUrl } from './
 import { sendMail } from '../smtp/mail';
 import { relocateFile } from '../api/generic';
 import { isUserRelated } from '../middleware/authorize';
-import { uploadFilesToBlob } from '../api/blobApi';
+import { removeFileFromBlob, uploadFilesToBlob } from '../api/blobApi';
 import Tenant from '../models/tenant';
+import { checkAssetOwnership } from './asset.service';
+import { removeSystemOwnership } from './system.service';
+import { removeFaultOwnership } from './fault.service';
 
 export const registerUser = async (req) => {
 	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang } = req.body;
@@ -76,7 +79,7 @@ export const uploadAvatar = async (req) => {
 };
 
 export const updateUserData = async (req) => {
-	let { userId, email, firstName, lastName, phoneNumber, birthDate, employedBy, role } = req.body;
+	let { userId, email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive } = req.body;
 
     const isRelated = await isUserRelated('users', User, userId, req.user._id, req.headers.permLevel);
 
@@ -84,11 +87,21 @@ export const updateUserData = async (req) => {
 		return { error: true, reason: 'unauthorized', status: 403 };
     }
     
+	const user = await User.findOne({ _id: userId });
+	
+	if (user.isActive !== isActive && isActive === false) {
+		const ownership = await removeUserOwnerships(userId);
+		if (ownership.error) {
+			return ownership;
+		}
+	}
+	console.log(isActive)
 	return await User.findOneAndUpdate(
 		{ _id: userId },
-		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role },
+		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive },
 		{ new: true, useFindAndModify: false }
 	).populate('role');
+
 };
 
 export const removeAvatar = async (req) => {
@@ -180,14 +193,21 @@ export const reloginUser = async (req) => {
 	});
 };
 
-export const deleteUser = async (req) => {
+export const deactivateUser = async (req) => {
 	const { userId } = req.body;
-	let userFolder = `${process.env.FS_LOCAL}/users/${userId}`;
-	if (fs.existsSync(userFolder)) {
-		fs.rmdirSync(userFolder, { recursive: true });
+	if (checkAssetOwnership()) {
+		return {
+			status: 405,
+			error: true,
+			reason: "cannotDeactivateAssetOwner"
+
+		}
 	}
-	return await User.findOneAndDelete({ _id: userId });
+	const user = await User.findOne({_id: userId });
+	await removeUserOwnerships(userId);
 };
+
+
 
 export const resetPasswordLink = async (req) => {
 	const { email } = req.body;
@@ -315,4 +335,18 @@ export const verifyEmailExists = async (req) => {
         reason: 'Email found successfully',
 		userId: user[0]._id
     };
+}
+
+export const removeUserOwnerships = async userId => {
+	const ow = await checkAssetOwnership(userId)
+	if (ow) {
+		return {
+			status: 405,
+			error: true,
+			reason: "cannotDeactivateAssetOwner"
+		}
+	};
+	await removeSystemOwnership(userId);
+	await removeFaultOwnership(userId);
+	return { error: false };
 }

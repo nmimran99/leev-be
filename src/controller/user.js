@@ -17,8 +17,8 @@ export const updateUserData = async (req, res) => {
     try{
         let data = await userService.updateUserData(req);
         if (data.error) {
-            return res.status(400).send(data.error.details);
-        }
+			return res.status(data.status).send(data.reason);
+		}
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -102,9 +102,9 @@ export const reloginUser = async (req, res) => {
     }
 }
 
-export const deleteUser = async (req, res) => {
+export const deactivateUser = async (req, res) => {
     try {
-        const deleteUser = await userService.deleteUser(req);
+        const deleteUser = await userService.deactivateUser(req);
         if (deleteUser) {
             return res.status(500).send(deleteUser);   
         }

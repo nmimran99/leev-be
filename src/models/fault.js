@@ -24,8 +24,10 @@ const faultSchema = new Schema({
 
 faultSchema.pre('save', async function(next) {
     let fault = this;
-    let newValue = await incrementCounter('faults');
-    fault.faultId = 'FLT-' + newValue.currentValue;
+    if (!fault.faultId) {
+        let newValue = await incrementCounter('faults');
+        fault.faultId = 'FLT-' + newValue.currentValue;
+    }
     next();
 })
 

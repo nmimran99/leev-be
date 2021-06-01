@@ -213,3 +213,13 @@ export const updateSystemData = async (req) => {
 		{ new: true }
 	);
 };
+
+
+export const removeSystemOwnership = async userId => {
+	const systems = await System.find({ owner: userId}).populate('asset');
+	return Promise.all(systems.map(async system => {
+		system.owner = system.asset.owner;
+		system.relatedUsers = system.relatedUsers.filter(u => u !== userId)
+		await system.save();
+	}));
+}
