@@ -10,6 +10,7 @@ const taskSchema = new Schema({
     description: String,
     asset: { type: Schema.Types.ObjectId, default: null, ref: 'Asset'},
     system: { type: Schema.Types.ObjectId, default: null, ref: 'System'},
+    location: { type: Schema.Types.ObjectId, ref: 'Location'},
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     createdBy: Schema.Types.ObjectId,

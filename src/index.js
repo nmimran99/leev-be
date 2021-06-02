@@ -15,6 +15,7 @@ import tenantRoute from './routes/tenant';
 import userRoute from './routes/user';
 import mapRoute from './routes/map';
 import roleRoute from './routes/role';
+import locationRoute from './routes/location';
 import notificationRoute from './routes/notification';
 import path from 'path';
 import cron from 'node-cron';
@@ -78,6 +79,7 @@ app.use('/documents', docRoute);
 app.use('/notifications', notificationRoute);
 app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
+app.use('/locations', locationRoute);
 
 cron.schedule('00 20 * * *' , syncRepeatableTasks);
 

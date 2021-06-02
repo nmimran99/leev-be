@@ -15,7 +15,7 @@ import { removeSystemOwnership } from './system.service';
 import { removeFaultOwnership } from './fault.service';
 
 export const registerUser = async (req) => {
-	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang } = req.body;
+	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang, data } = req.body;
 	const { tenant, _id: createdBy } = req.user;
 	let errors = await checkUnique(req);
 	if (errors.email) {
@@ -40,6 +40,7 @@ export const registerUser = async (req) => {
 		birthDate,
 		employedBy,
 		createdBy,
+		data,
 		avatar: req.file ? req.file.filename : null,
 		role,
 		changePasswordOnFirstLogin: true,
@@ -79,7 +80,7 @@ export const uploadAvatar = async (req) => {
 };
 
 export const updateUserData = async (req) => {
-	let { userId, email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive } = req.body;
+	let { userId, email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive, data } = req.body;
 
     const isRelated = await isUserRelated('users', User, userId, req.user._id, req.headers.permLevel);
 
@@ -98,7 +99,7 @@ export const updateUserData = async (req) => {
 	console.log(isActive)
 	return await User.findOneAndUpdate(
 		{ _id: userId },
-		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive },
+		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive, data },
 		{ new: true, useFindAndModify: false }
 	).populate('role');
 
@@ -313,10 +314,18 @@ export const getUserDataById = async (req) => {
 		return { error: true, reason: 'unauthorized', status: 403 };
 	}
     
-	return await User.findOne(
+	let user = await User.findOne(
 		{ _id: userId },
-		'_id tenant firstName lastName email phoneNumber birthDate employedBy avatar role isActive'
+		'_id tenant firstName lastName email phoneNumber birthDate employedBy avatar role isActive data'
 	).populate('role');
+	
+	user = user.toObject();
+	
+	if (!user.data) {
+		user.data = { isResident: false, isOwner: false };
+	};
+
+	return user;
 };
 
 export const verifyEmailExists = async (req) => {

@@ -9,6 +9,7 @@ import Document from '../models/document';
 import Task from '../models/task';
 import Comment from '../models/comment';
 import Role from '../models/role'
+import Location from '../models/location';
 import { getDate, getDay, getDayOfYear, getMonth, getYear, parseISO } from 'date-fns';
 
 
@@ -115,7 +116,8 @@ export const getDBModal = (model) => {
             users: User,
             roles: Role,
             comments: Comment,
-            systems: System
+            systems: System,
+            locations: Location
         };
 
         resolve(ms[model]);

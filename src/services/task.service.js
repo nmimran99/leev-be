@@ -46,6 +46,7 @@ export const getTask = async (req) => {
 			},
 		},
 		{ path: 'status' },
+		{ path: 'location' },
 		{
 			path: 'comments',
 			populate: {
@@ -65,6 +66,7 @@ export const createTask = async (req) => {
 		description,
 		asset,
 		system,
+		location,
 		owner,
 		relatedUsers,
 		steps,
@@ -83,6 +85,7 @@ export const createTask = async (req) => {
 		description,
 		asset: asset || null,
 		system: system || null,
+		location: location || null,
 		owner,
 		relatedUsers: JSON.parse(relatedUsers),
 		steps: JSON.parse(steps),
@@ -116,6 +119,7 @@ export const updateTask = async (req) => {
 		description,
 		asset,
 		system,
+		location,
 		owner,
 		steps,
 		isUsingSteps,
@@ -142,6 +146,7 @@ export const updateTask = async (req) => {
 			description,
 			asset,
 			system,
+			location,
 			owner,
 			steps: JSON.parse(steps),
 			isUsingSteps,
@@ -163,6 +168,7 @@ export const updateTask = async (req) => {
 			populate: { path: 'role', model: 'Role', select: 'roleName' },
 		},
 		{ path: 'status' },
+		{ path: 'location' },
 		{
 			path: 'comments',
 			populate: {

@@ -22,6 +22,7 @@ const userSchema = new Schema({
     createdBy: String,
     avatar: String,
     isActive: { type: Boolean, default: true },
+    data: Object,
     role: { type: Schema.Types.ObjectId, ref: 'Role'},
     lang: String
 }, {

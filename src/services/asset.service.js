@@ -145,8 +145,6 @@ export const getAssetExtended = async (req) => {
 	const faultStatuses = await getStatusIds('faults', 'open');
 	const taskStatuses = await getStatusIds('tasks', 'open');
 
-	console.log(taskStatuses)
-
 	let asset = await Asset.findOne({ _id: assetId }).populate([
 		{
 			path: "owner",
@@ -182,7 +180,6 @@ export const getAssetExtended = async (req) => {
 			path: 'status'
 		}
 	]);
-	console.log(asset.tasks)
 	asset.faults = await Fault.find({ asset: assetId, status: { $in: faultStatuses } }).populate([
 		{
 			path: "owner",

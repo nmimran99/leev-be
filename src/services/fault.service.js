@@ -15,7 +15,7 @@ import { sendMail } from "../smtp/mail";
 // only permLevel that is being checked is 1.
 
 export const createFault = async (req) => {
-	let { title, description, asset, system, owner, relatedUsers } = req.body;
+	let { title, description, asset, system, owner, relatedUsers, location } = req.body;
 
 	let createdBy = null;
 
@@ -50,6 +50,7 @@ export const createFault = async (req) => {
 		description,
 		asset,
 		system,
+		location,
 		owner: owner || assetData.owner,
 		relatedUsers: relatedUsers || relatedUsersArr,
 		status: initStatus._id,
@@ -59,7 +60,6 @@ export const createFault = async (req) => {
 		comments: [],
 	});
 
-	console.log(fault);
 	let savedFault = await fault.save();
 	// if (!savedFault.images.length) return savedFault;
 
@@ -200,7 +200,7 @@ export const updateFaultOwner = async (req) => {
 };
 
 export const updateFaultData = async (req) => {
-	const { _id, title, description, asset, system, owner, uploadedImages } =
+	const { _id, title, description, asset, system, owner, uploadedImages, location } =
 		req.body;
 
 	const isRelated = await isUserRelated(
@@ -214,27 +214,6 @@ export const updateFaultData = async (req) => {
 		return { error: true, reason: "unauthorized", status: 403 };
 	}
 
-	// let prepImages = [];
-	// let images = [];
-	// if (req.files.length) {
-	// 	req.files.forEach((f) => {
-	// 		images.push(f.filename);
-	// 	});
-
-	// 	await Promise.all(
-	// 		images.map(async (image, index) => {
-	// 			let newURL = await relocateFile(image, _id, 'faults');
-	// 			prepImages[index] = newURL;
-	// 		})
-	// 	);
-	// }
-
-	// removeUnlistedImages(
-	// 	[...prepImages, ...JSON.parse(uploadedImages)],
-	// 	'faults',
-	// 	_id
-	// );
-
 	const urls = await uploadFilesToBlob(req.files, "images");
 
 	return await Fault.findOneAndUpdate(
@@ -244,6 +223,7 @@ export const updateFaultData = async (req) => {
 			description,
 			asset,
 			system,
+			location,
 			owner,
 			images: [...urls, ...JSON.parse(uploadedImages)],
 			lastUpdatedBy: req.user._id,
@@ -257,6 +237,7 @@ export const updateFaultData = async (req) => {
 		},
 		{ path: "asset" },
 		{ path: "system" },
+		{ path: "location" },
 		{
 			path: "relatedUsers",
 			select: "firstName lastName phoneNumber avatar role",
@@ -319,6 +300,7 @@ export const getFaults = async (req, additionalFilters) => {
 			},
 			{ path: "asset" },
 			{ path: "system" },
+			{ path: "location" },
 			{ path: "status" },
 			{
 				path: "relatedUsers",
@@ -367,6 +349,7 @@ export const getFault = async (req) => {
 		},
 		{ path: "asset" },
 		{ path: "system" },
+		{ path: "location" },
 		{
 			path: "relatedUsers",
 			select: "firstName lastName phoneNumber avatar role",
