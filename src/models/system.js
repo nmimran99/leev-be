@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { logChanges } = require('../logger/log.service');
 const Schema = mongoose.Schema;
 
 
@@ -41,9 +42,15 @@ const systemSchema = new Schema({
             issuer: String,
             expiryDate: Date
         }
-    }
+    },
+    lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
 });
 
-module.exports = mongoose.model('System', systemSchema);
+const System = mongoose.model('System', systemSchema);
+System.watch([], { fullDocument: 'updateLookup' })
+.on('change', (data) => {
+    logChanges(data);
+})
+module.exports = System;

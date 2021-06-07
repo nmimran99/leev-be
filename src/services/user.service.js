@@ -13,6 +13,7 @@ import Tenant from '../models/tenant';
 import { checkAssetOwnership } from './asset.service';
 import { removeSystemOwnership } from './system.service';
 import { removeFaultOwnership } from './fault.service';
+import Location from '../models/location';
 
 export const registerUser = async (req) => {
 	let { email, password, firstName, lastName, phoneNumber, birthDate, employedBy, role, lang, data } = req.body;
@@ -48,7 +49,11 @@ export const registerUser = async (req) => {
 	});
 
 	let savedUser = await user.save();
-	// let newURL = await relocateFile(savedUser.avatar, savedUser._id, 'users');
+
+	if (savedUser.data.location) {
+		await Location.findOneAndUpdate({ _id: savedUser.data.location}, { $push: { residents: savedUser._id }})	
+	}
+
 	const newURL = await uploadFilesToBlob([req.file], 'images');
 	savedUser.avatar = newURL[0];
 	return await savedUser.save();
@@ -66,15 +71,6 @@ export const uploadAvatar = async (req) => {
 	const user = await User.findOne({ _id: userId }, 'avatar');
 	if (!user) return;
 
-	// if (user.avatar) {
-	// 	let oldAvatar = user.avatar.replace(process.env.BACKEND_URL, process.env.FS_LOCAL);
-	// 	if (fs.existsSync(oldAvatar)) {
-	// 		fs.unlinkSync(oldAvatar);
-	// 	}
-	// }
-
-	// let newAvatar = req.file.filename;
-	// let newURL = await relocateFile(newAvatar, userId, 'users');
 	const newURL = await uploadFilesToBlob([req.file], 'images');
 	return await User.findOneAndUpdate({ _id: userId }, { avatar: newURL[0] }, { new: true });
 };
@@ -91,12 +87,26 @@ export const updateUserData = async (req) => {
 	const user = await User.findOne({ _id: userId });
 	
 	if (user.isActive !== isActive && isActive === false) {
-		const ownership = await removeUserOwnerships(userId);
+		const ownership = await removeUserOwnerships(userId, req.user._id);
 		if (ownership.error) {
 			return ownership;
 		}
 	}
-	console.log(isActive)
+
+	try {
+		if (data.location !== user.data.location ) {
+			if (user.data.location) {
+				await Location.findOneAndUpdate({ _id: user.data.location }, { $pull: { residents: user._id }}, { useFindAndModify: false });	
+			}
+			if (data.location) {
+				await Location.findOneAndUpdate({ _id: data.location }, { $push: { residents: user._id }}, { useFindAndModify: false });
+			}
+		}
+	} catch (e) {
+		console.log(e.message)
+	}
+	
+	
 	return await User.findOneAndUpdate(
 		{ _id: userId },
 		{ email, firstName, lastName, phoneNumber, birthDate, employedBy, role, isActive, data },
@@ -205,7 +215,7 @@ export const deactivateUser = async (req) => {
 		}
 	}
 	const user = await User.findOne({_id: userId });
-	await removeUserOwnerships(userId);
+	await removeUserOwnerships(userId, req.user._id);
 };
 
 
@@ -293,10 +303,18 @@ export const extractuserId = async (token) => {
 export const getUserList = async (req) => {
 	const { tenant } = req.user;
 
-	return User.find({ tenant }, '_id firstName lastName phoneNumber avatar employedBy role').populate([
+	return User.find({ tenant, 'data.isResident': false, 'data.isOwner': false }, '_id firstName lastName phoneNumber avatar employedBy role data').populate([
 		{ path: 'role', model: 'Role', select: 'roleName' },
 	]);
 };
+
+export const getResidentList = async (req) => {
+	const { tenant } = req.user;
+
+	return User.find({ tenant, $or: [{'data.isResident': true}, {'data.isOwner': true}] }, '_id firstName lastName phoneNumber avatar employedBy role data').populate([
+		{ path: 'role', model: 'Role', select: 'roleName' },
+	]);
+}
 
 export const getUsersData = async (req) => {
 	const { userList } = req.body;
@@ -320,7 +338,7 @@ export const getUserDataById = async (req) => {
 	).populate('role');
 	
 	user = user.toObject();
-	
+
 	if (!user.data) {
 		user.data = { isResident: false, isOwner: false };
 	};
@@ -346,7 +364,7 @@ export const verifyEmailExists = async (req) => {
     };
 }
 
-export const removeUserOwnerships = async userId => {
+export const removeUserOwnerships = async (userId, actionBy) => {
 	const ow = await checkAssetOwnership(userId)
 	if (ow) {
 		return {
@@ -355,7 +373,7 @@ export const removeUserOwnerships = async userId => {
 			reason: "cannotDeactivateAssetOwner"
 		}
 	};
-	await removeSystemOwnership(userId);
-	await removeFaultOwnership(userId);
+	await removeSystemOwnership(userId, actionBy);
+	await removeFaultOwnership(userId, actionBy);
 	return { error: false };
 }

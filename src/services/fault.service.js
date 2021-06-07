@@ -486,7 +486,7 @@ export const changeFaultStatus = async (req) => {
 
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ status },
+		{ status, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate("status");
 };
@@ -559,6 +559,7 @@ export const removeFaultOwnership = async (userId) => {
 		faults.map(async (fault) => {
 			fault.owner = fault.system.owner;
 			fault.relatedUsers = fault.relatedUsers.filter(u => u != userId)
+			fault.lastUpdatedBy = userId;
 			await fault.save();
 		})
 	);

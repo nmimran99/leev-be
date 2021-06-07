@@ -6,6 +6,7 @@ import Fault from "../models/fault";
 import Location from "../models/location";
 import { geoCode } from "./geocoder.service";
 import { getStatusIds } from "./status.service";
+import User from "../models/user";
 
 export const createAsset = async (req) => {
 	const { tenant, userId, address, owner, type, addInfo } = req.body;
@@ -142,9 +143,6 @@ export const getAssetExtended = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	const faultStatuses = await getStatusIds('faults', 'open');
-	const taskStatuses = await getStatusIds('tasks', 'open');
-
 	let asset = await Asset.findOne({ _id: assetId }).populate([
 		{
 			path: "owner",
@@ -152,59 +150,109 @@ export const getAssetExtended = async (req) => {
 			populate: "role",
 		},
 	]);
-	asset = asset.toObject();
-	asset.systems = await System.find({ asset: assetId }).populate([
-		{
-			path: "owner",
-			select: "_id firstName lastName phoneNumber role avatar",
-			populate: "role",
-		},
-		{
-			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber role avatar',
-			populate: "role",
-		}
-	]);
-	asset.tasks = await Task.find({ asset: assetId, status: { $in: taskStatuses } }).populate([
-		{
-			path: "owner",
-			select: "firstName lastName phoneNumber role avatar",
-			populate: "role",
-		},
-		{
-			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber role avatar',
-			populate: "role",
-		},
-		{
-			path: 'status'
-		}
-	]);
-	asset.faults = await Fault.find({ asset: assetId, status: { $in: faultStatuses } }).populate([
-		{
-			path: "owner",
-			select: "firstName lastName phoneNumber role avatar",
-			populate: "role",
-		},
-		{
-			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber role avatar',
-			populate: "role",
-		},
-		{
-			path: 'status'
-		}
-	]);
-	asset.locations = await Location.find({ asset: assetId }).populate([
-		{
-			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber role avatar',
-			populate: "role",
-		}
-	]);
 
-	
 	return asset;
+};
+
+export const getAssetData = async (req) => {
+	const { assetId, module } = req.body;
+
+	const faultStatuses = await getStatusIds("faults", "open");
+	const taskStatuses = await getStatusIds("tasks", "open");
+
+	const isRelated = await isUserRelated(
+		"assets",
+		Asset,
+		assetId,
+		req.user._id,
+		req.headers.permLevel
+	);
+
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+	let results = {};
+
+	try {
+		if (module === "systems") {
+			results.systems = await System.find({ asset: assetId }).populate([
+				{
+					path: "owner",
+					select: "_id firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+				{
+					path: "relatedUsers",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+			]);
+		}
+		if (module === "tasks") {
+			results.tasks = await Task.find({
+				asset: assetId,
+				status: { $in: taskStatuses },
+			}).populate([
+				{
+					path: "owner",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+				{
+					path: "relatedUsers",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+				{
+					path: "status",
+				},
+			]);
+		}
+		if (["faults", "systems", "locations"].includes(module)) {
+			results.faults = await Fault.find({
+				asset: assetId,
+				status: { $in: faultStatuses },
+			}).populate([
+				{
+					path: "owner",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+				{
+					path: "relatedUsers",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+				{
+					path: "status",
+				},
+			]);
+		}
+		if (module === "locations") {
+			results.locations = await Location.find({ asset: assetId }).populate([
+				{
+					path: "relatedUsers",
+					select: "firstName lastName phoneNumber role avatar",
+					populate: "role",
+				},
+			]);
+		}
+		if (module === "residents") {
+			results.residents = await User.find({
+				'data.asset': assetId,
+				$or: [{ "data.isResident": true }, { "data.isOwner": true }],
+			}).populate(
+				{
+					path: "data.location",
+					model: 'Location'
+				}
+			);
+		}
+	} catch (e) {
+		console.log(e.message);
+	}
+
+	return results;
 };
 
 export const removeAsset = async (req) => {
@@ -238,8 +286,13 @@ export const getAssetExternal = async (req) => {
 	try {
 		const asset = await Asset.findOne({ _id: assetId }, "address");
 		const systems = await System.find({ asset: asset._id }, "name");
+		const locations = await Location.find({ asset: assetId }, "name");
 
-		return { asset, systems: systems.length ? systems : null };
+		return {
+			asset,
+			systems: systems.length ? systems : [],
+			locations: locations.length ? locations : [],
+		};
 	} catch (e) {
 		return { error: true, reason: "asset or systems not found", status: 200 };
 	}
@@ -247,4 +300,4 @@ export const getAssetExternal = async (req) => {
 export const checkAssetOwnership = async (userId) => {
 	const arr = await Asset.find({ owner: userId });
 	return Boolean(arr.length);
-}
+};

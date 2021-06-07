@@ -2,7 +2,8 @@ import { removeFile } from '../api/generic';
 import Document from '../models/document';
 import path from 'path';
 import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
-import { uploadFilesToBlob } from '../api/blobApi';
+import { removeFileFromBlob, uploadFilesToBlob } from '../api/blobApi';
+import { logDeletion } from '../logger/log.service';
 
 export const createDocument = async (req) => {
 	const { tenant, _id: createdBy } = req.user;
@@ -29,6 +30,7 @@ export const createDocument = async (req) => {
 		task,
 		user,
 		createdBy,
+		lastUpdatedBy: createdBy,
 		type: path.extname(req.file.filename),
 		url: newURL[0],
 	});
@@ -59,10 +61,12 @@ export const deleteDocument = async (req) => {
 	const doc = await Document.findOne({ _id: documentId });
 	if (!doc) return;
 	await removeFileFromBlob(doc.url);
-	return await Document.findOneAndDelete(
+	let deleted = await Document.findOneAndDelete(
 		{ _id: documentId },
 		{ useFindAndModify: false }
 	);
+	await logDeletion(deleted, req.user._id, 'documents');
+	return deleted;
 };
 
 export const getDocuments = async (req) => {
@@ -101,7 +105,7 @@ export const updateDocumentDetails = async (req) => {
 	}
 
 	const updated = getDocmentsQueryParams(details);
-	return await Document.findOneAndUpdate({ _id: details._id }, { ...updated }, { new: true, useFindAndModify: false}).populate([
+	return await Document.findOneAndUpdate({ _id: details._id }, { ...updated, lastUpdatedBy: req.user._id, }, { new: true, useFindAndModify: false}).populate([
 		{ path: 'asset', select: 'address' },
 		{ path: 'system', select: 'name' },
 		{ path: 'fault', select: 'faultId' },

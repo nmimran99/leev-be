@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
+import { logChanges } from '../logger/log.service';
 import { incrementCounter } from '../services/counter.service';
 import { createNotification } from '../services/notification.service';
 
@@ -34,6 +35,7 @@ faultSchema.pre('save', async function(next) {
 const Fault = mongoose.model('Fault', faultSchema);
 Fault.watch([], { fullDocument: 'updateLookup' })
 .on('change', (data) => {
+    logChanges(data);
     createNotification(data);
 })
 module.exports = Fault;

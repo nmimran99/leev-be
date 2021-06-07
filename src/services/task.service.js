@@ -265,14 +265,17 @@ export const addTaskComment = async (req) => {
 	}
 
 	if (req.file) {
-		newURL = await uploadFilesToBlob([req.file], 'images');
+		let uploaded = await uploadFilesToBlob([req.file], "images");
+		if (uploaded.length) {
+			newURL = uploaded[0];
+		}
 	}
 
 	const comment = new Comment({
 		parentObject: taskId,
 		user: userId,
 		text: text,
-		image: newURL[0]
+		image: newURL
 	});
 
 	let comm = await comment.save();

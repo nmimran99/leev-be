@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { logChanges } = require('../logger/log.service');
 const Schema = mongoose.Schema;
 const { incrementCounter } = require('../services/counter.service');
 
@@ -13,7 +14,8 @@ const documentSchema = new Schema({
     user: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     type: String,
     url: String,
-    createdBy: Schema.Types.ObjectId
+    createdBy: Schema.Types.ObjectId,
+    lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
 });
@@ -25,5 +27,12 @@ documentSchema.pre('save', async function(next) {
     next();
 })
 
-module.exports = mongoose.model('Document', documentSchema);
+const Document = mongoose.model('Document', documentSchema);
+    Document.watch([], { fullDocument: 'updateLookup' })
+    .on('change', (data) => {
+        logChanges(data);
+})
+module.exports = Document;
+
+
 

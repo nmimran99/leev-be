@@ -22,6 +22,7 @@ router.post('/resetPasswordLink', controller.resetPasswordLink);
 router.post('/setNewPassword', controller.setNewPassword);
 router.post('/authorizeSetNewPassword', controller.authorizeSetNewPassword);
 router.get('/getUserList', authenticate, authorize, controller.getUserList);
+router.get('/getResidentList', authenticate, authorize, controller.getResidentList);
 router.post('/getUsersData', controller.getUsersData);
 router.post('/getUserDataById', authenticate, authorize, controller.getUserDataById);
 router.post('/updateUserRole', authenticate, authorize, controller.updateUserRole);

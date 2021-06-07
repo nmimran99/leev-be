@@ -10,6 +10,7 @@ export const createSystem = async (req) => {
 		owner,
 		relatedUsers,
 		data,
+		lastUpdatedBy: req.user._id
 	});
 
 	return await system.save();
@@ -83,7 +84,7 @@ export const addRelatedUsers = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemId },
-		{ relatedUsers: users },
+		{ relatedUsers: users, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber' },
@@ -109,7 +110,7 @@ export const addRelatedUser = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemId },
-		{ $push: { relatedUsers: userId } },
+		{ $push: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
@@ -134,7 +135,7 @@ export const updateSystemOwner = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemId },
-		{ owner: owner },
+		{ owner, lastUpdatedBy: req.user._id },
 		{ new: true }
 	);
 };
@@ -155,7 +156,7 @@ export const updateSystemName = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemId },
-		{ name: name },
+		{ name, lastUpdatedBy: req.user._id },
 		{ new: true }
 	);
 };
@@ -176,7 +177,7 @@ export const removeRelatedUser = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemId },
-		{ $pull: { relatedUsers: userId } },
+		{ $pull: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate([
 		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
@@ -209,17 +210,18 @@ export const updateSystemData = async (req) => {
 
 	return await System.findOneAndUpdate(
 		{ _id: systemData.system },
-		{ data: systemData.data },
+		{ data: systemData.data, lastUpdatedBy: req.user._id },
 		{ new: true }
 	);
 };
 
 
-export const removeSystemOwnership = async userId => {
+export const removeSystemOwnership = async (userId,actionBy) => {
 	const systems = await System.find({ owner: userId}).populate('asset');
 	return Promise.all(systems.map(async system => {
 		system.owner = system.asset.owner;
 		system.relatedUsers = system.relatedUsers.filter(u => u !== userId)
+		system.lastUpdatedBy = actionBy
 		await system.save();
 	}));
 }

@@ -7,6 +7,7 @@ const locationSchema = new Schema({
     asset: { type: Schema.Types.ObjectId, ref: 'Asset' },
     name: String,
     relatedUsers: [{ type: Schema.Types.ObjectId, ref: 'User' }],
+    residents: [{type: Schema.Types.ObjectId, ref: 'User'}],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User'}
 }, {
     timestamps: true

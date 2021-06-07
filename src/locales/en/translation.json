@@ -20,6 +20,8 @@
         "relatedUserAddedSubject": "Added as Related",
         "faultsCreatedSuccessfulyText": "created a new Fault",
         "tasksCreatedSuccessfulyText": "created a new Task",
+        "faultsCreatedSuccessfulyTextSystem": "New fault created",
+        "tasksCreatedSuccessfulyTextSystem": "New task created",
         "itemCreatedSuccessfulyInstructions": "To get an update on the progress of the fault, please click on the link below"
         
     },
