@@ -284,7 +284,7 @@ export const getAssetExternal = async (req) => {
 	const { assetId } = req.body;
 
 	try {
-		const asset = await Asset.findOne({ _id: assetId }, "address");
+		const asset = await Asset.findOne({ _id: assetId }, "address tenant").populate('tenant');
 		const systems = await System.find({ asset: asset._id }, "name");
 		const locations = await Location.find({ asset: assetId }, "name");
 
