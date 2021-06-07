@@ -5,7 +5,7 @@ export const logChanges = async (data) => {
     let module = data.ns.coll; 
     let itemIdentifier = data.documentKey._id;
     let payload = {};
-    console.log(data)
+
     const createLogEntry = (le) => {
         return new Log({
             tenant: data.fullDocument.tenant,
