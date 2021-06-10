@@ -17,6 +17,7 @@ import mapRoute from './routes/map';
 import roleRoute from './routes/role';
 import locationRoute from './routes/location';
 import notificationRoute from './routes/notification';
+import dashboardRoute from './routes/dashboard';
 import path from 'path';
 import cron from 'node-cron';
 import i18next from 'i18next';
@@ -80,6 +81,7 @@ app.use('/notifications', notificationRoute);
 app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
 app.use('/locations', locationRoute);
+app.use('/dashboard', dashboardRoute);
 
 cron.schedule('00 20 * * *' , syncRepeatableTasks);
 
