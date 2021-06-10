@@ -11,8 +11,6 @@ import { getAddress } from "./asset.service";
 import i18next from "i18next";
 import { sendMail } from "../smtp/mail";
 
-// function without permission checking are functions that are allowing only item.read === 2;
-// only permLevel that is being checked is 1.
 
 export const createFault = async (req) => {
 	let { title, description, asset, system, owner, relatedUsers, location } = req.body;
@@ -56,20 +54,14 @@ export const createFault = async (req) => {
 		status: initStatus._id,
 		createdBy,
 		lastUpdatedBy: createdBy,
+		closedDate: null,
 		images: [],
 		comments: [],
 	});
 
 	let savedFault = await fault.save();
-	// if (!savedFault.images.length) return savedFault;
 
 	const urls = await uploadFilesToBlob(req.files, "images");
-	// await Promise.all(
-	// 	savedFault.images.map(async (image, index) => {
-	// 		let newURL = await relocateFile(image, savedFault._id, 'faults');
-	// 		savedFault.images[index] = newURL;
-	// 	})
-	// );
 
 	return await Fault.findOneAndUpdate(
 		{ _id: savedFault._id },
@@ -484,9 +476,17 @@ export const changeFaultStatus = async (req) => {
 		return { error: true, reason: "unauthorized", status: 403 };
 	}
 
+	const st = await Status.findOne({ _id: status }); 
+	let toUpdate = {
+		status, lastUpdatedBy: req.user._id
+	};
+	if (st.state === 'close') {
+		toUpdate.closedDate = new Date();
+	};
+
 	return await Fault.findOneAndUpdate(
 		{ _id: faultId },
-		{ status, lastUpdatedBy: req.user._id },
+		toUpdate,
 		{ new: true }
 	).populate("status");
 };

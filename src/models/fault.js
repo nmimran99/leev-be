@@ -18,6 +18,7 @@ const faultSchema = new Schema({
     images: [],
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null},
+    closedDate: Date,
     lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' }
 }, {
     timestamps: true
