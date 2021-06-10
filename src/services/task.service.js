@@ -7,6 +7,7 @@ import { getUnauthorizedMessage } from '../api/generic';
 import { uploadFilesToBlob } from '../api/blobApi';
 import { parseISO } from 'date-fns';
 
+
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
 
@@ -241,6 +242,14 @@ export const updateTaskStatus = async (req) => {
 	if (!isRelated) {
 		return getUnauthorizedMessage();
 	}
+	
+	const st = await Status.findOne({ _id: status }); 
+	let toUpdate = {
+		status, lastUpdatedBy: req.user._id
+	};
+	if (st.state === 'close') {
+		toUpdate.closedDate = new Date();
+	};
 
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
