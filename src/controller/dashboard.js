@@ -4,6 +4,7 @@ export const getDashboardData = async (req, res) => {
     try{
         let data = await dashboardService.getDashboardData(req);
         if(data.error) {
+            
             return res.status(res.status).send(res.reason);
         }
         return res.status(200).send(data);

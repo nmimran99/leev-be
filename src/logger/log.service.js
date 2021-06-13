@@ -23,7 +23,8 @@ export const logChanges = async (data) => {
 
     if (data.operationType === 'update') {
 		const { updatedFields } = data.updateDescription;
-        actionBy = data.updateDescription.updatedFields.lastUpdatedBy;
+        actionBy = data.updateDescription.updatedFields.lastUpdatedBy || data.fullDocument.lastUpdatedBy;
+        console.log(updatedFields)
 		itemId = data.fullDocument[`${data.ns.coll.slice(0, -1)}Id`];
         Promise.all(Object.entries(updatedFields).map( async entry => {
 			let key = entry[0];
@@ -40,8 +41,10 @@ export const logChanges = async (data) => {
                 payload['comment'] = val;
 			} else if (key.includes('relatedUsers')) {
 				data.updateDescription.updatedFields.relatedUser = entry[1];
-				actionType = 'realtedUserAdded';
+				actionType = 'relatedUserAdded';
                 payload['relatedUser'] = val;
+            } else if (['updatedAt', 'image', 'lastUpdatedBy'].includes(key)){
+                return;
 			} else {
                 payload[key] = val;
                 actionType = 'detailsUpdate'

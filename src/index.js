@@ -87,7 +87,7 @@ cron.schedule('00 20 * * *' , syncRepeatableTasks);
 
 mongoose.connect(
 	`mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.axy2i.mongodb.net/${process.env.DB_NAME || 'leevdb'}?retryWrites=true&w=majority`,
-	{ useNewUrlParser: true, useUnifiedTopology: true }
+	{ useNewUrlParser: true, useUnifiedTopology: true, autoIndex: false }
 );
 
 app.listen(process.env.PORT, () => {

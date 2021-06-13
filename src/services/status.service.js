@@ -33,3 +33,7 @@ export const createStatusItem = async (req) => {
 
     return await stList.save();
 }
+
+export const getStatusByNameAndModule = async (name, module) => {
+    return await StatusList.find({ statusId: name, module });
+}
