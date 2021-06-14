@@ -253,7 +253,7 @@ export const updateTaskStatus = async (req) => {
 
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ status, lastUpdatedBy: req.user._id },
+		{ ...toUpdate },
 		{ new: true }
 	).populate('status');
 };

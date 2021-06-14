@@ -92,20 +92,6 @@ export const updateUserData = async (req) => {
 			return ownership;
 		}
 	}
-
-	try {
-		if (data.location !== user.data.location ) {
-			if (user.data.location) {
-				await Location.findOneAndUpdate({ _id: user.data.location }, { $pull: { residents: user._id }}, { useFindAndModify: false });	
-			}
-			if (data.location) {
-				await Location.findOneAndUpdate({ _id: data.location }, { $push: { residents: user._id }}, { useFindAndModify: false });
-			}
-		}
-	} catch (e) {
-		console.log(e.message)
-	}
-	
 	
 	return await User.findOneAndUpdate(
 		{ _id: userId },

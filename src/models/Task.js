@@ -28,7 +28,8 @@ const taskSchema = new Schema({
     instances: [{ type: Schema.Types.ObjectId, ref: 'Task'}],
     images: [],
     comments: [{ type: Schema.Types.ObjectId, ref: 'Comment'}],
-    lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' } 
+    lastUpdatedBy: { type: Schema.Types.ObjectId, ref: 'User' },
+    closedDate: Date 
 }, {
     timestamps: true
 });
