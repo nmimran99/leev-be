@@ -15,7 +15,7 @@ export const logChanges = async (data) => {
             itemData: {
                 module,
                 itemId: le.itemId,
-                itemIdentifier: le.itemIdentifier
+                itemIdentifier: data.fullDocument._id
             },
             payload 
         });
@@ -25,7 +25,7 @@ export const logChanges = async (data) => {
 		const { updatedFields } = data.updateDescription;
         actionBy = data.updateDescription.updatedFields.lastUpdatedBy || data.fullDocument.lastUpdatedBy;
         console.log(updatedFields)
-		itemId = data.fullDocument[`${data.ns.coll.slice(0, -1)}Id`];
+        itemId = data.fullDocument[`${data.ns.coll === 'documents' ? 'doc' : data.ns.coll.slice(0, -1)}Id`];
         Promise.all(Object.entries(updatedFields).map( async entry => {
 			let key = entry[0];
             let val = entry[1];
@@ -57,8 +57,8 @@ export const logChanges = async (data) => {
 		actionType = 'itemCreated';
         actionBy = data.fullDocument.createdBy;
         payload.document = data.fullDocument;
-        itemId = data.fullDocument[`${data.ns.coll.slice(0, -1)}Id`];
-        const logEntry = createLogEntry({ actionBy, actionType, payload, itemId})
+        itemId = data.fullDocument[`${data.ns.coll === 'documents' ? 'doc' : data.ns.coll.slice(0, -1)}Id`];
+        const logEntry = createLogEntry({ actionBy, actionType, payload: data.fullDocument, itemId})
         return await logEntry.save();
 	}
 }
