@@ -15,7 +15,7 @@ export const logChanges = async (data) => {
             itemData: {
                 module,
                 itemId: le.itemId,
-                itemIdentifier
+                itemIdentifier: le.itemIdentifier
             },
             payload 
         });
