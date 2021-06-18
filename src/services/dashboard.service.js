@@ -293,10 +293,19 @@ export const getLastOperations = async (req, filters) => {
             model: 'User',
             select: 'avatar role firstName lastName role phoneNumber'
         },
+		{
+            path: 'payload.actionBy',
+            model: 'User',
+            select: 'avatar role firstName lastName role phoneNumber'
+        },
         {
             path: 'actionBy',
             model: 'User',
-            select: 'avatar role firstName lastName role phoneNumber'
+            select: 'avatar role firstName lastName role phoneNumber',
+			populate: {
+				path: 'role',
+				model: 'Role'
+			}
         }
     ])
 		.sort({ createdAt: -1 })
