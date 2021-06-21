@@ -29,7 +29,8 @@ export const authenticate = async (req) => {
 }
 
 
-export const generateAccessToken = async (userId) => {
+export const generateAccessToken = 
+async (userId) => {
     const refreshToken = randtoken.uid(256) 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10)
     const payload = {
@@ -52,9 +53,9 @@ export const genereateResetPasswordUrl = (userId) => {
             id: userId
         };
         var token = jwt.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: '10s'
+            expiresIn: '5m'
         });        
-        resolve(`http://${process.env.FRONTEND_ADDRESS}:${process.env.FRONTEND_PORT}/users/passwordreset/${token}`);
+        resolve(`${process.env.FRONTEND_URL}/reset/${token}`);
     }); 
 }
 

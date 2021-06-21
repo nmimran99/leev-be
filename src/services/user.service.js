@@ -208,22 +208,36 @@ export const deactivateUser = async (req) => {
 
 export const resetPasswordLink = async (req) => {
 	const { email } = req.body;
-	let user = await User.findOne({ email });
-	if (user) {
-		let url = await genereateResetPasswordUrl(user._id);
-		let res = await sendMail({
-			to: email,
-			subject: 'WorkBanter - Password reset',
-			text: `Please go to the following link to reset you password:\n ${url}`,
-		});
-		if (res.isError) {
-			return res.error;
+	try {
+		let user = await User.findOne({ email });
+		if (user) {
+			let url = await genereateResetPasswordUrl(user._id);
+			let res = await sendMail({
+				to: email,
+				subject: 'Leev - Password reset',
+				template: 'resetPassword',
+				context: {
+					text: `Please go to the following link to reset you password`,
+					url: url
+				}
+			});
+			if (res.isError) {
+				return res.error;
+			}
+			return res.data;
 		}
-		return res.data;
+		return {
+			status: 404,
+			message: 'user not found'
+		};
+	} catch(e) {
+		console.log(e.message);
+		return {
+			status: 500,
+			message: 'System Error'
+		}
 	}
-	return {
-		message: 'Failed to retrive user',
-	};
+	
 };
 
 export const setNewPassword = async (req) => {
@@ -272,11 +286,12 @@ export const extractuserId = async (token) => {
 			decodedToken = await jwt_decode(token);
 			if (!decodedToken) throw 'failed to decode';
 		} catch (e) {
-			return { message: 'could not decode token' };
+			return { err, message: 'could not decode token' };
 		}
 		if (err) {
 			if (err.message === 'jwt expired') {
 				return {
+					err,
 					message: 'Password reset request time fream has expired',
 				};
 			}
@@ -362,4 +377,9 @@ export const removeUserOwnerships = async (userId, actionBy) => {
 	await removeSystemOwnership(userId, actionBy);
 	await removeFaultOwnership(userId, actionBy);
 	return { error: false };
+}
+
+export const verifyResetPasswordHandle = async (req) => {
+	const { handle } = req.body;
+	return await extractuserId(handle);
 }

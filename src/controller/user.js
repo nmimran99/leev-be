@@ -203,3 +203,15 @@ export const verifyEmailExists = async (req, res) => {
     }
 }
 
+export const verifyResetPasswordHandle = async (req, res) => {
+    try {
+        let data = await userService.verifyResetPasswordHandle(req);
+        if (data.error) {
+            return res.status(data.status).send(data);
+        }
+        return res.status(200).send(data)
+    } catch(e) {
+        return res.status(500).send(e.message)
+    }
+}
+

@@ -27,6 +27,7 @@ router.post('/getUsersData', controller.getUsersData);
 router.post('/getUserDataById', authenticate, authorize, controller.getUserDataById);
 router.post('/updateUserRole', authenticate, authorize, controller.updateUserRole);
 router.post('/verifyEmailExists', controller.verifyEmailExists);
+router.post('/verifyResetPasswordHandle', controller.verifyResetPasswordHandle)
 
 router.post('/sendTestEmail', async (req, res) => {
     let d = await sendMail({
