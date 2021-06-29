@@ -535,7 +535,7 @@ export const notifyUserAssigned = async (user, fault) => {
 				faultCreatedSuccessfully: t("email.faultCreatedSuccessfully"),
 				faultFollowInstructions: t("email.faultFollowInstructions"),
 				faultId: fault.faultId,
-				faultLink: `http://www.leev.co.il/workspace/faults/${fault.faultId}`,
+				faultLink: `${process.env.FRONTEND_URL}/workspace/faults/${fault.faultId}`,
 				systemLabel: t("email.system"),
 				systemData: fault.system.name,
 				titleLabel: t("email.faultsTitle"),
