@@ -477,7 +477,6 @@ export const getTaskOptions = async (req) => {
 };
 
 export const syncRepeatableTasks = async () => {
-	console.log('evaluating')
 	const tasks = await Task.find({ isRepeatActive: true, isRepeatable: true });
 	tasks.forEach(task => {
 		task.schedule.forEach(sc => {

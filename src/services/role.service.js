@@ -35,7 +35,6 @@ export const getRole = async (req) => {
 export const getRoles = async (req) => {
     const { _id: userTenant } = req.user.tenant;
     const { tenant } = req.body;
-    console.log(tenant)
     return await Role.find({ tenant: tenant || userTenant })
     
 }

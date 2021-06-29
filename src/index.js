@@ -59,10 +59,8 @@ i18next
 		fallBackLng: ['he']
 	}, function(err, t) {
         if (err) {
-            console.log(err);
             return;
         }
-        console.log('i18n loaded')
         
     });
 

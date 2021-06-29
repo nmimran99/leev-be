@@ -57,7 +57,6 @@ export const getOpenFaultsByStatus = async (req, filters) => {
 		...filters,
 		...getRelatedQuery(req.header.permLevel, req.user._id),
 	};
-	console.log(addQuery);
 
 	const agg = await Fault.aggregate([
 		{ $match: { ...addQuery, status: { $in: faultStatuses } } },

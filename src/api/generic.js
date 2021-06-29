@@ -66,7 +66,6 @@ export const removeFile = async (module, parent, filename) => {
             if (err)
                 console.log(err)
         });
-        console.log(filePath, ' was removed');
         resolve(true);
     })
     
@@ -79,7 +78,6 @@ export const removeFileByPath = async (filepath) => {
             if (err)
                 console.log(err)
         });
-        console.log(filepath, ' was removed');
         resolve(true);
     })
     
