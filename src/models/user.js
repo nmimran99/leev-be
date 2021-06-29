@@ -24,7 +24,8 @@ const userSchema = new Schema({
     isActive: { type: Boolean, default: true },
     data: Object,
     role: { type: Schema.Types.ObjectId, ref: 'Role'},
-    lang: String
+    lang: String,
+    isAdmin: { type: Boolean, default: false }
 }, {
     timestamps: true
 });

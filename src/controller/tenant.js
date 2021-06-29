@@ -18,9 +18,9 @@ export const updateTenant = async (req, res) => {
     } 
 }
 
-export const removeTenant = async (req, res) => {
+export const deleteTenant = async (req, res) => {
     try{
-        let data = await tenantService.removeTenant(req);
+        let data = await tenantService.deleteTenant(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);
@@ -30,6 +30,15 @@ export const removeTenant = async (req, res) => {
 export const getTenants = async (req, res) => {
     try{
         let data = await tenantService.getTenants(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    } 
+}
+
+export const getTenant = async (req, res) => {
+    try{
+        let data = await tenantService.getTenant(req);
         return res.status(200).send(data);
     } catch(e) {
         return res.status(500).send(e.message);

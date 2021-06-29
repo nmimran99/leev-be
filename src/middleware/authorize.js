@@ -2,9 +2,14 @@
 export const authorize = (req, res, next) => {
 	const { requesttype, module } = req.headers;
     const { role } = req.user;
-	
+
+	if (req.user.isAdmin) {
+		req.headers.permLevel = 2;
+		next();
+		return;
+	}
     const modulePermissions = role.permissions.find((p) => p.module === module);
-	const permLevel = modulePermissions[requesttype];
+	const permLevel = modulePermissions[requesttype] || 0;
 	
 	if (permLevel < getMinPermLevel(requesttype)) {
 		return res.status(403).send({ error: true, status: 403, reason: 'unauthorized' });

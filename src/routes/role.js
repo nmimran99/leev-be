@@ -7,7 +7,7 @@ const router = Router();
 
 router.post('/createRole', authenticate, authorize, controller.createRole);
 router.post('/getRole', authenticate, authorize ,controller.getRole);
-router.get('/getRoles', authenticate, authorize ,controller.getRoles);
+router.post('/getRoles', authenticate, authorize ,controller.getRoles);
 router.post('/updateRole', authenticate, authorize , controller.updateRole);
 
 

@@ -162,7 +162,7 @@ export const reloginUser = async (req) => {
 	}
 	const user = await User.findOne(
 		{ _id: decodedToken.id },
-		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role lang'
+		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role lang isAdmin'
 	).populate('role');
 	return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
 		if (!user) return { auth: false, message: 'user token not linked to a user', user: null, token: null };
@@ -304,7 +304,7 @@ export const extractuserId = async (token) => {
 export const getUserList = async (req) => {
 	const { tenant } = req.user;
 
-	return User.find({ tenant, 'data.isResident': false, 'data.isOwner': false }, '_id firstName lastName phoneNumber avatar employedBy role data').populate([
+	return User.find({ tenant, 'data.isResident': false, 'data.isOwner': false }, '_id firstName lastName phoneNumber avatar employedBy role data isAdmin').populate([
 		{ path: 'role', model: 'Role', select: 'roleName' },
 	]);
 };
@@ -319,7 +319,7 @@ export const getResidentList = async (req) => {
 
 export const getUsersData = async (req) => {
 	const { userList } = req.body;
-	return await User.find({ _id: { $in: userList } }, '_id firstName lastName phoneNumber avatar role').populate(
+	return await User.find({ _id: { $in: userList } }, '_id firstName lastName phoneNumber avatar role isAdmin').populate(
 		'role'
 	);
 };
@@ -335,7 +335,7 @@ export const getUserDataById = async (req) => {
     
 	let user = await User.findOne(
 		{ _id: userId },
-		'_id tenant firstName lastName email phoneNumber birthDate employedBy avatar role isActive data'
+		'_id tenant firstName lastName email phoneNumber birthDate employedBy avatar role isActive data isAdmin'
 	).populate('role');
 	
 	user = user.toObject();

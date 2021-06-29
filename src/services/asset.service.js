@@ -277,6 +277,10 @@ export const getAssetsQueryParams = (query) => {
 	if (query.assets) {
 		query._id = { $in: query.assets };
 	}
+
+	if (query.searchText) {
+		delete query.searchText
+	}
 	return query;
 };
 
