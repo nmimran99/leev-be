@@ -296,6 +296,7 @@ export const getFaults = async (req, additionalFilters) => {
 			{ path: "status" },
 			{
 				path: "relatedUsers",
+				
 				select: "firstName lastName phoneNumber avatar role",
 				populate: { path: "role", model: "Role", select: "roleName" },
 			},
@@ -376,6 +377,11 @@ export const getFaultsQueryParams = (query) => {
 
 	if (query.status) {
 		query.status = { $in: query.status };
+	}
+
+	if (query.assets) {
+		query.asset = { $in: query.assets };
+		delete query.assets
 	}
 
 	return query;

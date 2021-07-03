@@ -7,19 +7,22 @@ import Location from "../models/location";
 import { geoCode } from "./geocoder.service";
 import { getStatusIds } from "./status.service";
 import User from "../models/user";
+import { uploadFilesToBlob } from "../api/blobApi";
 
 export const createAsset = async (req) => {
-	const { tenant, userId, address, owner, type, addInfo } = req.body;
+	let { tenant, userId, address, owner, type, addInfo } = req.body;
+	const urls = await uploadFilesToBlob(req.files, "images");
 
 	const coordinates = await geoCode(getAddress(address));
 	let asset = new Asset({
 		tenant: tenant,
-		address: { ...address },
+		address: JSON.parse(address),
 		owner,
 		type,
-		addInfo,
+		addInfo: JSON.parse(addInfo),
 		createdBy: userId,
 		coordinates,
+		images: urls
 	});
 
 	return await asset.save();
@@ -35,8 +38,9 @@ export const getAddress = (address) => {
 };
 
 export const updateAsset = async (req) => {
-	const { assetId, owner, address, addInfo, type } = req.body;
-
+	const { 
+		_id: assetId, owner, address, addInfo, type, uploadedImages } = req.body;
+	const urls = await uploadFilesToBlob(req.files, "images");
 	const isRelated = await isUserRelated(
 		"assets",
 		Asset,
@@ -48,10 +52,10 @@ export const updateAsset = async (req) => {
 	if (!isRelated) {
 		return getUnauthorizedMessage();
 	}
-
+	console.log([ ...JSON.parse(uploadedImages), ...urls])
 	return await Asset.findOneAndUpdate(
 		{ _id: assetId },
-		{ owner, address, addInfo, type },
+		{ owner, address: JSON.parse(address), addInfo: JSON.parse(addInfo), type, images: [ ...JSON.parse(uploadedImages), ...urls] },
 		{ new: true }
 	);
 };

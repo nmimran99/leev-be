@@ -8,6 +8,7 @@ import { createURL, removeFileByPath } from './generic';
 
 
 export const uploadFilesToBlob = async (files, container) => {
+    if (!files.length) return [];
     const blobServiceClient = BlobServiceClient.fromConnectionString(process.env.BLOB_CONNECTION_STRING);
     const containerClient = blobServiceClient.getContainerClient(container);
     let promises = [];
