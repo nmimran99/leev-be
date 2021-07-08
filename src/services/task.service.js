@@ -145,9 +145,9 @@ export const updateTask = async (req) => {
 		{
 			title,
 			description,
-			asset,
-			system,
-			location,
+			asset: asset || null,
+			system: system || null,
+			location: location || null,
 			owner,
 			steps: JSON.parse(steps),
 			isUsingSteps,
@@ -536,10 +536,9 @@ export const completeTaskStep = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	return await Task.findOneAndUpdate({ _id: taskId},
-		{ $set: { "steps.$[el].isCompleted": isCompleted }},
+	return await Task.findOneAndUpdate({ _id: taskId, steps: { $elemMatch: { order: order}}},
+		{ $set: { 'steps.$.isCompleted': isCompleted }},
 		{ 
-			arrayFilters: [{ "el.order": order }],
 			new: true,
 			useFindAndModify: false
 		}		
