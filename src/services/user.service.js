@@ -45,7 +45,7 @@ export const registerUser = async (req) => {
 		avatar: req.file ? req.file.filename : null,
 		role,
 		changePasswordOnFirstLogin: true,
-		lang: tenant.lang
+		lang: t.lang
 	});
 
 	let savedUser = await user.save();
