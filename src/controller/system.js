@@ -26,6 +26,18 @@ export const getSystems = async (req, res) => {
     } 
 }
 
+export const getSystem = async (req, res) => {
+    try{
+        let data = await systemService.getSystem(req);
+        if(data.error) {
+            return res.status(res.status).send(res.reason);
+        }
+        return res.status(200).send(data);
+    } catch(e) {
+        return res.status(500).send(e.message);
+    } 
+}
+
 export const removeSystem = async (req, res) => {
     try{
         let data = await systemService.removeSystem(req);

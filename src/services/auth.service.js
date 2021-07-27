@@ -22,7 +22,8 @@ export const authenticate = async (req) => {
             email: user.email,
             firstname: user.firstName,
             lastname: user.lastName,
-            lang: user.lang
+            lang: user.lang,
+            data: user.data
         },
         token
     }

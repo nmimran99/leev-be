@@ -7,6 +7,7 @@ const router = Router();
 
 router.post('/createSystem', authenticate, authorize, controller.createSystem);
 router.post('/getSystems', authenticate, authorize, controller.getSystems);
+router.post('/getSystem', authenticate, authorize, controller.getSystem);
 router.post('/removeSystem', authenticate, authorize, controller.removeSystem);
 router.post('/editSystemName', authenticate, authorize, controller.editSystemName);
 router.post('/addRelatedUsers', authenticate, authorize, controller.addRelatedUsers);

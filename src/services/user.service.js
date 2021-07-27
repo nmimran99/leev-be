@@ -162,7 +162,7 @@ export const reloginUser = async (req) => {
 	}
 	const user = await User.findOne(
 		{ _id: decodedToken.id },
-		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role lang isAdmin'
+		'_id username firstName lastName email employedBy phoneNumber isActive birthDate avatar tenant role lang isAdmin data'
 	).populate('role');
 	return jwt.verify(token, process.env.JWT_SECRET, async (err) => {
 		if (!user) return { auth: false, message: 'user token not linked to a user', user: null, token: null };
@@ -319,7 +319,7 @@ export const getResidentList = async (req) => {
 
 export const getUsersData = async (req) => {
 	const { userList } = req.body;
-	return await User.find({ _id: { $in: userList } }, '_id firstName lastName phoneNumber avatar role isAdmin').populate(
+	return await User.find({ _id: { $in: userList } }, '_id firstName lastName phoneNumber avatar role isAdmin data').populate(
 		'role'
 	);
 };

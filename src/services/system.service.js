@@ -225,3 +225,24 @@ export const removeSystemOwnership = async (userId,actionBy) => {
 		await system.save();
 	}));
 }
+
+export const getSystem = async (req) => {
+	const { systemId } = req.body;
+
+	const isRelated = await isUserRelated(
+		'systems',
+		System,
+		systemId,
+		req.user._id,
+		req.headers.permLevel
+	);
+
+	if (!isRelated) {
+		return getUnauthorizedMessage();
+	}
+
+	return await System.findOne({ _id: systemId }).populate([
+		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
+		{ path: 'asset' }
+	])
+}
