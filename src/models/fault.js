@@ -16,6 +16,7 @@ const faultSchema = new Schema({
     owner: { type: Schema.Types.ObjectId, ref: 'User'},
     status: { type: Schema.Types.ObjectId, ref: 'StatusList'},
     images: [],
+    tags: [String],
     comments: [{type: Schema.Types.ObjectId, ref: 'Comment'}],
     createdBy: { type: Schema.Types.ObjectId, ref: 'User', default: null},
     closedDate: Date,

@@ -21,12 +21,12 @@ export const createNotification = async (data) => {
 			} else if (key.includes('comments')) {
 				data.updateDescription.updatedFields.comment = entry[1];
 				createCommentNotification(data);
-			} else if (
-				key.includes('relatedUsers')
-			) {
+			} else if (key.includes('relatedUsers')) {
 				data.updateDescription.updatedFields.relatedUser = entry[1];
 				createRelatedUserNotification(data);
-			}
+			} else if (key.includes('tags')) {
+				return;
+			} 
 		});
 	} else if (data.operationType === 'insert') {
 		createInsertNotification(data);
@@ -52,6 +52,7 @@ export const createRelatedUserNotification = async (data) => {
 		relatedUser,
 	});
 };
+
 
 export const createOwnerChangeNotification = async (data) => {
 	const owner = await User.findOne(

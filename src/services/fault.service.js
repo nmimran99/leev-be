@@ -10,13 +10,15 @@ import { uploadFilesToBlob } from "../api/blobApi";
 import { getAddress } from "./asset.service";
 import i18next from "i18next";
 import { sendMail } from "../smtp/mail";
+import Tag from "../models/tag";
 
 
 export const createFault = async (req) => {
-	let { title, description, asset, system, owner, relatedUsers, location } = req.body;
+	let { title, description, asset, system, owner, relatedUsers, location, tags } = req.body;
 
 	let createdBy = null;
-
+	tags = JSON.parse(tags);
+	relatedUsers = JSON.parse(relatedUsers);
 	let initStatus = await Status.findOne({ module: "faults", order: 1 });
 	let assetData = await Asset.findOne({ _id: asset }, "tenant owner");
 	let systemData = await System.findOne({ _id: system }, "owner");
@@ -57,17 +59,25 @@ export const createFault = async (req) => {
 		closedDate: null,
 		images: [],
 		comments: [],
+		tags
 	});
 
-	let savedFault = await fault.save();
-
-	const urls = await uploadFilesToBlob(req.files, "images");
-
-	return await Fault.findOneAndUpdate(
-		{ _id: savedFault._id },
-		{ images: urls },
-		{ new: true }
-	);
+	try {
+		let savedFault = await fault.save();
+	
+		const urls = await uploadFilesToBlob(req.files, "images");
+		await modifyTagMentions(savedFault._id, tags, [], createdBy);
+		
+		return await Fault.findOneAndUpdate(
+			{ _id: savedFault._id },
+			{ images: urls },
+			{ new: true }
+		);
+	} catch (e) {
+		console.log(e.message);
+		return
+	}
+	
 };
 
 export const deleteFault = async (req) => {
@@ -192,7 +202,7 @@ export const updateFaultOwner = async (req) => {
 };
 
 export const updateFaultData = async (req) => {
-	const { _id, title, description, asset, system, owner, uploadedImages, location } =
+	let { _id, title, description, asset, system, owner, uploadedImages, location, tags } =
 		req.body;
 
 	const isRelated = await isUserRelated(
@@ -207,6 +217,8 @@ export const updateFaultData = async (req) => {
 	}
 
 	const urls = await uploadFilesToBlob(req.files, "images");
+	tags = JSON.parse(tags);
+	await modifyTagMentions(_id, tags, null, req.user._id);
 
 	return await Fault.findOneAndUpdate(
 		{ _id: _id },
@@ -219,6 +231,7 @@ export const updateFaultData = async (req) => {
 			owner,
 			images: [...urls, ...JSON.parse(uploadedImages)],
 			lastUpdatedBy: req.user._id,
+			tags
 		},
 		{ new: true }
 	).populate([
@@ -308,6 +321,7 @@ export const getFaults = async (req, additionalFilters) => {
 					select: "firstName lastName avatar",
 				},
 			},
+			{ path: "tags", model: 'Tag' }
 		]);
 	return Promise.resolve(faults);
 };
@@ -328,7 +342,9 @@ export const getFault = async (req) => {
 	}
 
 	if (plain) {
-		return await Fault.findOne({ _id: faultId }).populate("status");
+		
+		return await Fault.findOne({ _id: faultId }).populate([{ path: "status" },
+		{ path: "tags", model: 'Tag' }]);
 	}
 	return await Fault.findOne({ faultId: faultId }).populate([
 		{
@@ -361,6 +377,7 @@ export const getFault = async (req) => {
 			},
 		},
 		{ path: "status" },
+		{ path: "tags", model: 'Tag' }
 	]);
 };
 
@@ -570,3 +587,95 @@ export const removeFaultOwnership = async (userId) => {
 		})
 	);
 };
+
+export const getFaultTags = async (req) => {
+	const { faultId } = req.body;
+	const { tenant } = req.user;
+
+	const tags = await Fault.findOne({ _id: faultId}, 'tags');
+	return await Tag.find({ tenant, _id: { $nin: tags }});
+}
+
+export const addFaultTag = async (req) => {
+	const { faultId, tagId } = req.body;
+
+	let savedTag;
+	let mention = { date: new Date, user: req.user._id, fault: faultId };
+
+	const checkFault = await Fault.findOne({ _id: faultId });
+	if (checkFault && checkFault.tags.includes(tagId)) {
+		return checkFault;
+	}
+	savedTag = await Tag.findOneAndUpdate({ _id: tagId}, { $push: { mentions: mention}}, { useFindAndModify: false, new: true});	
+
+	if (!savedTag) return;
+	return await Fault.findOneAndUpdate({ _id: faultId }, { $push: { tags: savedTag._id }}, { useFindAndModify: false, new: true });
+};
+
+export const removeFaultTag = async (req) => {
+	const { faultId, tagId } = req.body;
+
+	const isRelated = await isUserRelated(
+		"faults",
+		Fault,
+		faultId,
+		req.user._id,
+		req.headers.permLevel
+	);
+	if (!isRelated) {
+		return { error: true, reason: "unauthorized", status: 403 };
+	}
+
+	const updatedTag = await Tag.findOneAndUpdate({ _id: tagId }, { $pull: { mentions: { fault: faultId }}}, { useFindAndModify: false, new: true });
+	if (!updatedTag) return;
+	return await Fault.findOneAndUpdate({ _id: faultId }, { $pull: { tags: tagId }}, { useFindAndModify: false, new: true });
+}
+
+export const getFaultTagOptions = async (req) => {
+	const { faultId, searchText } = req.body;
+	const { tenant } = req.user;
+	console.log(searchText)
+	const fault = await Fault.findOne({ _id: faultId}, 'tags');
+	return await Tag.find({ tenant, _id: { $nin: fault ? fault.tags : [] }, value: { $regex: searchText }});
+}
+
+
+export const createTag = async (req) => {
+	const { value } = req.body;
+	const { tenant } = req.user;
+
+	const tag = await Tag.find({ tenant, value });
+	if (tag.length >= 1) return tag[0];
+
+	const newTag = new Tag({
+		tenant,
+		value,
+		mentions: []
+	});
+
+	return await newTag.save();
+}
+
+export const modifyTagMentions = async (faultId, newList, oldList, userId) => {
+
+	if (!oldList) {
+		let f = await Fault.findOne({ _id: faultId });
+		if (f) {
+			oldList = f.tags;
+		}
+	}
+	let addition = newList.filter(nl => !oldList.includes(nl));
+	let removal = oldList.filter(ol => !newList.includes(ol));
+
+	if (addition.length) {
+		Promise.all(addition.map( async tagAdd => {
+			return await Tag.findOneAndUpdate({ _id: tagAdd }, { $push: { mentions: { date: new Date, user: userId, fault: faultId } }});
+		}))
+	}
+	if (removal.length) {
+		Promise.all(removal.map( async tagRemove => {
+			return await Tag.findOneAndUpdate({ _id: tagRemove }, { $pull: { mentions: { fault: faultId }}});
+		}))
+	};
+	
+}

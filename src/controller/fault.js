@@ -226,3 +226,64 @@ export const assignUserToExternalFault = async (req, res) => {
 		return res.status(500).send(e.message);
 	}
 };
+
+export const addFaultTag = async (req, res) => {
+	try {
+		let data = await faultService.addFaultTag(req);
+		if (!data) {
+			return res.status(200).send(null);
+		}
+		if (data.error) {
+			return res.status(data.status).send(data.reason);
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		return res.status(500).send(e.message);
+	}
+};
+
+export const removeFaultTag = async (req, res) => {
+	try {
+		let data = await faultService.removeFaultTag(req);
+		if (!data) {
+			return res.status(200).send(null);
+		}
+		if (data.error) {
+			return res.status(data.status).send(data.reason);
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		return res.status(500).send(e.message);
+	}
+};
+
+export const getFaultTagOptions = async (req, res) => {
+	try {
+		let data = await faultService.getFaultTagOptions(req);
+		if (!data) {
+			return res.status(200).send(null);
+		}
+		if (data.error) {
+			return res.status(data.status).send(data.reason);
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		return res.status(500).send(e.message);
+	}
+};
+
+export const createTag = async (req, res) => {
+	try {
+		let data = await faultService.createTag(req);
+		if (!data) {
+			return res.status(200).send(null);
+		}
+		if (data.error) {
+			return res.status(data.status).send(data.reason);
+		}
+		return res.status(200).send(data);
+	} catch (e) {
+		return res.status(500).send(e.message);
+	}
+};
+
