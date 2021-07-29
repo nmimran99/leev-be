@@ -23,5 +23,9 @@ router.post('/updateFaultComment', authenticate, authorize, controller.updateFau
 router.post('/changeFaultStatus', authenticate, authorize, controller.changeFaultStatus);
 router.post('/getFaultOptions', authenticate, authorize, controller.getFaultOptions);
 router.post('/assignUserToExternalFault', controller.assignUserToExternalFault);
+router.post('/addFaultTag', authenticate, authorize, controller.addFaultTag);
+router.post('/removeFaultTag', authenticate, authorize, controller.removeFaultTag);
+router.post('/getFaultTagOptions', authenticate, authorize, controller.getFaultTagOptions);
+router.post('/createTag', authenticate, authorize, controller.createTag);
 
 export default router;

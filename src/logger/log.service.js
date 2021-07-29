@@ -40,7 +40,9 @@ export const logChanges = async (data) => {
                 payload['comment'] = val;
             } else if (key.includes('steps')) {
                 delete data.updateDescription.updatedFields[key];
-                data.updateDescription.updatedFields.steps = val;
+                data.updateDescription.updatedFields.steps = val; 
+			} else if (key.includes('tags')) {
+                return;
 			} else if (['updatedAt', 'image', 'lastUpdatedBy', 'relatedUsers'].includes(key)){
                 return;
 			} else {
