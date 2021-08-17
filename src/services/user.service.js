@@ -310,9 +310,23 @@ export const getUserList = async (req) => {
 };
 
 export const getResidentList = async (req) => {
+	const { asset } = req.query;
 	const { tenant } = req.user;
+	console.log(req.query)
+	let filters = { 
+		tenant, 
+		$or: [
+			{'data.isResident': true}, 
+			{'data.isOwner': true}
+		]
+	};
 
-	return User.find({ tenant, $or: [{'data.isResident': true}, {'data.isOwner': true}] }, '_id firstName lastName phoneNumber avatar employedBy role data').populate([
+	if (asset) {
+		filters['data.asset'] = asset;
+	}
+
+	console.log(filters)
+	return User.find(filters, '_id firstName lastName phoneNumber avatar employedBy role data').populate([
 		{ path: 'role', model: 'Role', select: 'roleName' },
 	]);
 }

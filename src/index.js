@@ -18,11 +18,11 @@ import roleRoute from './routes/role';
 import locationRoute from './routes/location';
 import notificationRoute from './routes/notification';
 import dashboardRoute from './routes/dashboard';
+import reportsRoute from './routes/reports';
 import path from 'path';
 import cron from 'node-cron';
 import i18next from 'i18next';
 import i18nextMiddleware from 'i18next-express-middleware';
-import Backend from 'i18next-node-fs-backend';
 import en from './locales/en/translation.json';
 import he from './locales/he/translation.json';
 import { syncRepeatableTasks } from './services/task.service';
@@ -80,6 +80,7 @@ app.use('/map', mapRoute);
 app.use('/roles', roleRoute);
 app.use('/locations', locationRoute);
 app.use('/dashboard', dashboardRoute);
+app.use('/reports', reportsRoute);
 
 cron.schedule('00 20 * * *' , syncRepeatableTasks);
 

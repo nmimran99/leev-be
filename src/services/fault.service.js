@@ -15,59 +15,66 @@ import Tag from "../models/tag";
 
 export const createFault = async (req) => {
 	let { title, description, asset, system, owner, relatedUsers, location, tags } = req.body;
-
-	let createdBy = null;
-	tags = JSON.parse(tags);
-	relatedUsers = JSON.parse(relatedUsers);
-	let initStatus = await Status.findOne({ module: "faults", order: 1 });
-	let assetData = await Asset.findOne({ _id: asset }, "tenant owner");
-	let systemData = await System.findOne({ _id: system }, "owner");
-
-	if (req.user) {
-		createdBy = req.user._id;
-	} else {
-		let systemUser = await User.findOne({ email: "system@leev.co.il" });
-		createdBy = systemUser._id;
-	}
-
-	let relatedUsersArr = [];
-	if (assetData) relatedUsersArr.push(assetData.owner);
-	if (systemData) relatedUsersArr.push(systemData.owner);
-	if (!owner) {
-		owner = systemData.owner;
-	}
-	relatedUsersArr = removeDuplicateObjectIds(
-		relatedUsersArr.filter((v) => v.toString() !== owner.toString())
-	);
-
-	if (!title) {
-		title = `${description.substr(0, 40)}...`;
-	}
-
-	let fault = new Fault({
-		tenant: req.user ? req.user.tenant : assetData.tenant,
-		title,
-		description,
-		asset,
-		system,
-		location,
-		owner: owner || assetData.owner,
-		relatedUsers: relatedUsers || relatedUsersArr,
-		status: initStatus._id,
-		createdBy,
-		lastUpdatedBy: createdBy,
-		closedDate: null,
-		images: [],
-		comments: [],
-		tags
-	});
-
-	try {
-		let savedFault = await fault.save();
+	let createdBy = null
 	
-		const urls = await uploadFilesToBlob(req.files, "images");
-		await modifyTagMentions(savedFault._id, tags, [], createdBy);
+	try {
+		if (tags) tags = JSON.parse(tags);
+		if (relatedUsers) relatedUsers = JSON.parse(relatedUsers);
 		
+		let initStatus = await Status.findOne({ module: "faults", order: 1 });
+		let assetData = await Asset.findOne({ _id: asset }, "tenant owner");
+		let systemData = await System.findOne({ _id: system }, "owner");
+
+		if (req.body.createdBy) {
+			createdBy = req.body.createdBy;
+		} else if (req.user) {
+			createdBy = req.user._id;
+		} else {
+			let systemUser = await User.findOne({ email: "system@leev.co.il" });
+			createdBy = systemUser._id;
+		}
+	
+	
+
+		let relatedUsersArr = [];
+		if (assetData) relatedUsersArr.push(assetData.owner);
+		if (systemData) relatedUsersArr.push(systemData.owner);
+		if (!owner) {
+			owner = systemData.owner;
+		}
+		relatedUsersArr = removeDuplicateObjectIds(
+			relatedUsersArr.filter((v) => v.toString() !== owner.toString())
+		);
+
+		if (!title) {
+			title = `${description.substr(0, 40)}...`;
+		}
+
+		let fault = new Fault({
+			tenant: req.user ? req.user.tenant : assetData.tenant,
+			title,
+			description,
+			asset,
+			system,
+			location,
+			owner: owner || assetData.owner,
+			relatedUsers: relatedUsers || relatedUsersArr || [],
+			status: initStatus._id,
+			createdBy,
+			lastUpdatedBy: createdBy,
+			closedDate: null,
+			images: [],
+			comments: [],
+			tags: tags || []
+		});
+
+		let savedFault = await fault.save();
+		const urls = await uploadFilesToBlob(req.files, "images");
+
+		if (tags) {
+			await modifyTagMentions(savedFault._id, tags, [], createdBy);
+		}
+	
 		return await Fault.findOneAndUpdate(
 			{ _id: savedFault._id },
 			{ images: urls },
