@@ -30,5 +30,9 @@
         "inProgress": "In Progress",
         "pending": "Pending", 
         "closed": "Closed"
+    },
+    "reports": {
+        "text1": "would like to share with you",
+        "text2": "Click on the following link to view the report"
     }
 }

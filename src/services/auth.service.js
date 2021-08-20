@@ -30,8 +30,7 @@ export const authenticate = async (req) => {
 }
 
 
-export const generateAccessToken = 
-async (userId) => {
+export const generateAccessToken = async (userId) => {
     const refreshToken = randtoken.uid(256) 
     const refreshTokenHash = await bcrypt.hash(refreshToken, 10)
     const payload = {
@@ -60,6 +59,9 @@ export const genereateResetPasswordUrl = (userId) => {
     }); 
 }
 
-
+export const signPayload = async (payload) => {
+    var token = jwt.sign(payload, process.env.JWT_SECRET);
+    return token;
+}
 
 

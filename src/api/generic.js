@@ -146,3 +146,8 @@ export const getDateParts = (date) => {
         yearDay: getDayOfYear(date)
     }
 }
+
+
+export const generateLink = (reportId) => {
+    return `${process.env.FRONTEND_URL}/workspace/reports/faults/${reportId}`
+}
