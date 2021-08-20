@@ -196,30 +196,36 @@ export const createReport = async (req) => {
 export const distributeReport = async (req) => {
 	const { reportId, userList } = req.body;
 
-	const report = await Report.findOne({_id: reportId}).populate('tenant');
-	const asset = await Asset.findOne({ _id: report.parameters.asset })
-	const users = await User.find({ _id: { $in: userList }});
-	const mailList = users.map(u => u.email);
+	try {
+		const report = await Report.findOne({_id: reportId}).populate('tenant');
+		const asset = await Asset.findOne({ _id: report.parameters.asset })
+		const users = await User.find({ _id: { $in: userList }});
+		const mailList = users.map(u => u.email);
 
-	const t = i18next.getFixedT(report.tenant.lang);
+		const t = i18next.getFixedT(report.tenant.lang);
 
-	let d = await sendMail({
-		from: "system@leev.co.il",
-		to: "system@leev.co.il",
-		bcc: mailList,
-		subject: `${report.tenant.name} - ${report.name}`,
-		template: "sharereport",
-		context: {
-			link: generateLink(reportId),
-			reportName: report.name,
-			companyName: report.tenant.name,
-			text1: t("reports.text1"),
-			text2: t("reports.text2"),
-			direction: report.tenant.lang === 'he' ? 'rtl' : 'ltr',
-			asset: getAddress(asset.address).address
-		}
-	});
+		let d = await sendMail({
+			from: "system@leev.co.il",
+			to: "system@leev.co.il",
+			bcc: mailList,
+			subject: `${report.tenant.name} - ${report.name}`,
+			template: "sharereport",
+			context: {
+				link: generateLink(reportId),
+				reportName: report.name,
+				companyName: report.tenant.name,
+				text1: t("reports.text1"),
+				text2: t("reports.text2"),
+				direction: report.tenant.lang === 'he' ? 'rtl' : 'ltr',
+				asset: getAddress(asset.address).address
+			}
+		});
 
+		return true;
+	} catch (e) {
+		console.log(e.message);
+		return false;
+	}
 }
 
 export const getReportPublic = async (req) => {
@@ -236,4 +242,11 @@ export const getReports = async (req) => {
 
 	return await Report.find({ tenant })
 		.populate([{ path: 'parameters.asset', model: Asset }, { path: 'createdBy', model: User}]);
+}
+
+
+export const getReport = async (req) => {
+	const { reportId } = req.body;
+
+	return await Report.findOne({ _id: reportId });
 }

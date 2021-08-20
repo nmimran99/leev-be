@@ -8,6 +8,7 @@ const router = Router();
 
 router.post('/getReportPublic', authenticate, authorize, controller.getReportPublic);
 router.post('/getReports', authenticate, authorize, controller.getReports);
+router.post('/getReport', authenticate, authorize, controller.getReport);
 router.post('/getReportData', authenticate, authorize, controller.getReportData);
 router.post('/createReport', authenticate, authorize, controller.createReport);
 router.post('/distributeReport', authenticate, authorize, controller.distributeReport)

@@ -55,3 +55,13 @@ export const getReports = async (req, res) => {
     }  
 }
 
+
+export const getReport = async (req, res) => {
+    try{
+        let data = await reportsService.getReport(req);
+        return res.status(200).send(data);
+    } catch(e) {
+        console.log(e.message)
+        return res.status(500).send(e.message);
+    }  
+}
