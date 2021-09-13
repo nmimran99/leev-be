@@ -1,18 +1,21 @@
-import { getDateParts, relocateFile, removeUnlistedImages } from '../api/generic';
-import Task from '../models/task';
-import Status from '../models/status';
-import Comment from '../models/comment';
-import { getRelatedQuery, isUserRelated } from '../middleware/authorize';
-import { getUnauthorizedMessage } from '../api/generic';
-import { uploadFilesToBlob } from '../api/blobApi';
-import { parseISO } from 'date-fns';
-
+import {
+	getDateParts,
+	relocateFile,
+	removeUnlistedImages,
+} from "../api/generic";
+import Task from "../models/task";
+import Status from "../models/status";
+import Comment from "../models/comment";
+import { getRelatedQuery, isUserRelated } from "../middleware/authorize";
+import { getUnauthorizedMessage } from "../api/generic";
+import { uploadFilesToBlob } from "../api/blobApi";
+import { parseISO } from "date-fns";
 
 export const getTask = async (req) => {
 	const { taskId, plain } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -23,45 +26,44 @@ export const getTask = async (req) => {
 	}
 
 	if (plain) {
-		return await Task.findOne({ _id: taskId }).populate('status');
+		return await Task.findOne({ _id: taskId }).populate("status");
 	}
 	return await Task.findOne({ taskId: taskId }).populate([
-		{ path: 'asset' },
-		{ path: 'system' },
+		{ path: "asset" },
+		{ path: "system" },
 		{
-			path: 'owner',
-			select: 'firstName lastName avatar phoneNumber role',
+			path: "owner",
+			select: "firstName lastName avatar phoneNumber role",
 			populate: {
-				path: 'role',
-				model: 'Role',
-				select: 'roleName',
+				path: "role",
+				model: "Role",
+				select: "roleName",
 			},
 		},
 		{
-			path: 'relatedUsers',
-			select: 'firstName lastName avatar phoneNumber, role',
+			path: "relatedUsers",
+			select: "firstName lastName avatar phoneNumber, role",
 			populate: {
-				path: 'role',
-				model: 'Role',
-				select: 'roleName',
+				path: "role",
+				model: "Role",
+				select: "roleName",
 			},
 		},
-		{ path: 'status' },
-		{ path: 'location' },
+		{ path: "status" },
+		{ path: "location" },
 		{
-			path: 'comments',
+			path: "comments",
 			populate: {
-				path: 'user',
-				model: 'User',
-				select: 'firstName lastName avatar',
+				path: "user",
+				model: "User",
+				select: "firstName lastName avatar",
 			},
 		},
-		{ path: 'instances' }
+		{ path: "instances" },
 	]);
 };
 
 export const createTask = async (req) => {
-
 	const {
 		title,
 		description,
@@ -78,7 +80,7 @@ export const createTask = async (req) => {
 		createdBy,
 	} = req.body;
 
-	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
+	let initStatus = await Status.findOne({ module: "tasks", order: 1 });
 
 	const task = new Task({
 		tenant: req.user.tenant,
@@ -90,21 +92,21 @@ export const createTask = async (req) => {
 		owner,
 		relatedUsers: JSON.parse(relatedUsers),
 		steps: JSON.parse(steps),
-		isUsingSteps: isUsingSteps === '' ? false : isUsingSteps,
+		isUsingSteps: isUsingSteps === "" ? false : isUsingSteps,
 		isSequential,
-		isRepeatable: isRepeatable === '' ? false : isUsingSteps,
+		isRepeatable: isRepeatable === "" ? false : isUsingSteps,
 		schedule: schedule ? JSON.parse(schedule) : [],
 		isRepeatActive: false,
 		instances: [],
 		createdBy,
 		status: initStatus,
 		images: [],
-		comments: []
+		comments: [],
 	});
 
 	let savedTask = await task.save();
 
-	const urls = await uploadFilesToBlob(req.files, 'images');
+	const urls = await uploadFilesToBlob(req.files, "images");
 
 	return await Task.findOneAndUpdate(
 		{ _id: savedTask._id },
@@ -128,7 +130,7 @@ export const updateTask = async (req) => {
 	} = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		_id,
 		req.user._id,
@@ -138,7 +140,7 @@ export const updateTask = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	const urls = await uploadFilesToBlob(req.files, 'images');
+	const urls = await uploadFilesToBlob(req.files, "images");
 
 	return await Task.findOneAndUpdate(
 		{ _id: _id },
@@ -152,30 +154,30 @@ export const updateTask = async (req) => {
 			steps: JSON.parse(steps),
 			isUsingSteps,
 			images: [...urls, ...JSON.parse(uploadedImages)],
-			lastUpdatedBy: req.user._id
+			lastUpdatedBy: req.user._id,
 		},
 		{ new: true }
 	).populate([
 		{
-			path: 'owner',
-			select: 'firstName lastName phoneNumber avatar role',
-			populate: { path: 'role', model: 'Role', select: 'roleName' },
+			path: "owner",
+			select: "firstName lastName phoneNumber avatar role",
+			populate: { path: "role", model: "Role", select: "roleName" },
 		},
-		{ path: 'asset' },
-		{ path: 'system' },
+		{ path: "asset" },
+		{ path: "system" },
 		{
-			path: 'relatedUsers',
-			select: 'firstName lastName phoneNumber avatar role',
-			populate: { path: 'role', model: 'Role', select: 'roleName' },
+			path: "relatedUsers",
+			select: "firstName lastName phoneNumber avatar role",
+			populate: { path: "role", model: "Role", select: "roleName" },
 		},
-		{ path: 'status' },
-		{ path: 'location' },
+		{ path: "status" },
+		{ path: "location" },
 		{
-			path: 'comments',
+			path: "comments",
 			populate: {
-				path: 'user',
-				model: 'User',
-				select: 'firstName lastName avatar',
+				path: "user",
+				model: "User",
+				select: "firstName lastName avatar",
 			},
 		},
 	]);
@@ -195,16 +197,16 @@ export const getTasks = async (req, additionalFilters) => {
 	const { permLevel } = req.headers;
 
 	const addQuery = {
-		...getTasksQueryParams({ ...filters, ...additionalFilters}),
+		...getTasksQueryParams({ ...filters, ...additionalFilters }),
 		...getRelatedQuery(permLevel, userId),
 	};
 
 	return Task.find({ tenant: tenant, ...addQuery }).populate([
-		{ path: 'asset' },
-		{ path: 'system' },
-		{ path: 'owner', select: 'firstName lastName phoneNumber avatar' },
-		{ path: 'status' },
-		{ path: 'instances' }
+		{ path: "asset" },
+		{ path: "system" },
+		{ path: "owner", select: "firstName lastName phoneNumber avatar" },
+		{ path: "status" },
+		{ path: "instances" },
 	]);
 };
 
@@ -212,7 +214,7 @@ export const updateTaskOwner = async (req) => {
 	const { taskId, owner } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -226,14 +228,14 @@ export const updateTaskOwner = async (req) => {
 		{ _id: taskId },
 		{ owner, lastUpdatedBy: req.user._id },
 		{ new: true }
-	).populate('owner');
+	).populate("owner");
 };
 
 export const updateTaskStatus = async (req) => {
 	const { taskId, status } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -242,20 +244,21 @@ export const updateTaskStatus = async (req) => {
 	if (!isRelated) {
 		return getUnauthorizedMessage();
 	}
-	
-	const st = await Status.findOne({ _id: status }); 
+
+	const st = await Status.findOne({ _id: status });
 	let toUpdate = {
-		status, lastUpdatedBy: req.user._id
+		status,
+		lastUpdatedBy: req.user._id,
 	};
-	if (st.state === 'close') {
+	if (st.state === "close") {
 		toUpdate.closedDate = new Date();
-	};
+	}
 
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
 		{ ...toUpdate },
 		{ new: true }
-	).populate('status');
+	).populate("status asset system owner");
 };
 
 export const addTaskComment = async (req) => {
@@ -263,7 +266,7 @@ export const addTaskComment = async (req) => {
 	let newURL = null;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -284,7 +287,7 @@ export const addTaskComment = async (req) => {
 		parentObject: taskId,
 		user: userId,
 		text: text,
-		image: newURL
+		image: newURL,
 	});
 
 	let comm = await comment.save();
@@ -294,7 +297,7 @@ export const addTaskComment = async (req) => {
 			$push: {
 				comments: comm,
 			},
-			lastUpdatedBy: req.user._id
+			lastUpdatedBy: req.user._id,
 		},
 		{
 			new: true,
@@ -302,11 +305,11 @@ export const addTaskComment = async (req) => {
 			useFindAndModify: false,
 		}
 	).populate({
-		path: 'comments',
+		path: "comments",
 		populate: {
-			path: 'user',
-			model: 'User',
-			select: 'firstName lastName avatar',
+			path: "user",
+			model: "User",
+			select: "firstName lastName avatar",
 		},
 	});
 };
@@ -315,7 +318,7 @@ export const updateTaskComment = async (req) => {
 	const { taskId, commentId, text } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -327,11 +330,11 @@ export const updateTaskComment = async (req) => {
 
 	await Comment.findOneAndUpdate({ _id: commentId }, { text }, { new: true });
 	return Task.findOne({ _id: taskId }).populate({
-		path: 'comments',
+		path: "comments",
 		populate: {
-			path: 'user',
-			model: 'User',
-			select: 'firstName lastName avatar',
+			path: "user",
+			model: "User",
+			select: "firstName lastName avatar",
 		},
 	});
 };
@@ -340,7 +343,7 @@ export const deleteTaskComment = async (req) => {
 	const { taskId, commentId } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -359,11 +362,11 @@ export const deleteTaskComment = async (req) => {
 			new: true,
 		}
 	).populate({
-		path: 'comments',
+		path: "comments",
 		populate: {
-			path: 'user',
-			model: 'User',
-			select: 'firstName lastName avatar',
+			path: "user",
+			model: "User",
+			select: "firstName lastName avatar",
 		},
 	});
 
@@ -375,7 +378,7 @@ export const addRelatedUser = async (req) => {
 	const { taskId, userId } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -390,11 +393,11 @@ export const addRelatedUser = async (req) => {
 		{ $push: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate({
-		path: 'relatedUsers',
+		path: "relatedUsers",
 		populate: {
-			path: 'user',
-			model: 'User',
-			select: 'firstName lastName avatar',
+			path: "user",
+			model: "User",
+			select: "firstName lastName avatar",
 		},
 	});
 };
@@ -403,7 +406,7 @@ export const removeRelatedUser = async (req) => {
 	const { taskId, userId } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -418,11 +421,11 @@ export const removeRelatedUser = async (req) => {
 		{ $pull: { relatedUsers: userId }, lastUpdatedBy: req.user._id },
 		{ new: true }
 	).populate({
-		path: 'relatedUsers',
+		path: "relatedUsers",
 		populate: {
-			path: 'user',
-			model: 'User',
-			select: 'firstName lastName avatar',
+			path: "user",
+			model: "User",
+			select: "firstName lastName avatar",
 		},
 	});
 };
@@ -449,7 +452,7 @@ export const updateTaskSchedule = async (req) => {
 	const { taskId, schedule } = req.body;
 
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -461,7 +464,11 @@ export const updateTaskSchedule = async (req) => {
 
 	return await Task.findOneAndUpdate(
 		{ _id: taskId },
-		{ schedule, lastUpdatedBy: req.user._id, isRepeatActive: Boolean(schedule.length) },
+		{
+			schedule,
+			lastUpdatedBy: req.user._id,
+			isRepeatActive: Boolean(schedule.length),
+		},
 		{ new: true, useFindAndModify: false }
 	);
 };
@@ -478,30 +485,44 @@ export const getTaskOptions = async (req) => {
 
 export const syncRepeatableTasks = async () => {
 	const tasks = await Task.find({ isRepeatActive: true, isRepeatable: true });
-	tasks.forEach(task => {
-		task.schedule.forEach(sc => {
+	tasks.forEach((task) => {
+		task.schedule.forEach((sc) => {
 			if (evaluateTaskSchedule(sc)) {
 				createTaskFormTemplate(task);
-			}		
-		})
-	})
-}
+			}
+		});
+	});
+};
 
 export const evaluateTaskSchedule = (schedule) => {
 	const currentDateParts = getDateParts(new Date());
 	const startDateParts = getDateParts(parseISO(schedule.startDate));
 	return (
-		schedule.interval === 'day' ||
-		( schedule.interval === 'week' && currentDateParts.weekDay == startDateParts.weekDay ) ||
-		( schedule.interval === 'month' && currentDateParts.day == startDateParts.day ) ||
-		( schedule.interval === 'year' && currentDateParts.yearDay == startDateParts.yearDay )
-	)
-}
+		schedule.interval === "day" ||
+		(schedule.interval === "week" &&
+			currentDateParts.weekDay == startDateParts.weekDay) ||
+		(schedule.interval === "month" &&
+			currentDateParts.day == startDateParts.day) ||
+		(schedule.interval === "year" &&
+			currentDateParts.yearDay == startDateParts.yearDay)
+	);
+};
 
 export const createTaskFormTemplate = async (taskTemplate) => {
-	
-	const { tenant, title, description, asset, system, owner, relatedUsers, steps, isUsingSteps, createdBy, images } = taskTemplate;
-	let initStatus = await Status.findOne({ module: 'tasks', order: 1 });
+	const {
+		tenant,
+		title,
+		description,
+		asset,
+		system,
+		owner,
+		relatedUsers,
+		steps,
+		isUsingSteps,
+		createdBy,
+		images,
+	} = taskTemplate;
+	let initStatus = await Status.findOne({ module: "tasks", order: 1 });
 
 	const task = new Task({
 		tenant,
@@ -515,18 +536,21 @@ export const createTaskFormTemplate = async (taskTemplate) => {
 		isUsingSteps,
 		createdBy,
 		status: initStatus,
-		images
+		images,
 	});
 
 	const savedTask = await task.save();
-	await Task.findOneAndUpdate({ _id: taskTemplate._id }, { $push: { instances: savedTask._id } });
-}
+	await Task.findOneAndUpdate(
+		{ _id: taskTemplate._id },
+		{ $push: { instances: savedTask._id } }
+	);
+};
 
 export const completeTaskStep = async (req) => {
 	const { taskId, order, isCompleted } = req.body;
-	
+
 	const isRelated = await isUserRelated(
-		'tasks',
+		"tasks",
 		Task,
 		taskId,
 		req.user._id,
@@ -536,12 +560,12 @@ export const completeTaskStep = async (req) => {
 		return getUnauthorizedMessage();
 	}
 
-	return await Task.findOneAndUpdate({ _id: taskId, steps: { $elemMatch: { order: order}}},
-		{ $set: { 'steps.$.isCompleted': isCompleted }},
-		{ 
+	return await Task.findOneAndUpdate(
+		{ _id: taskId, steps: { $elemMatch: { order: order } } },
+		{ $set: { "steps.$.isCompleted": isCompleted } },
+		{
 			new: true,
-			useFindAndModify: false
-		}		
-	
-	)
-}
+			useFindAndModify: false,
+		}
+	);
+};
