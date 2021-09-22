@@ -500,11 +500,11 @@ export const evaluateTaskSchedule = (schedule) => {
 	return (
 		schedule.interval === "day" ||
 		(schedule.interval === "week" &&
-			currentDateParts.weekDay == startDateParts.weekDay) ||
+			currentDateParts.weekDay == startDateParts.weekDay - 1) ||
 		(schedule.interval === "month" &&
-			currentDateParts.day == startDateParts.day) ||
+			currentDateParts.day == startDateParts.day - 1) ||
 		(schedule.interval === "year" &&
-			currentDateParts.yearDay == startDateParts.yearDay)
+			currentDateParts.yearDay == startDateParts.yearDay - 1)
 	);
 };
 
@@ -515,6 +515,7 @@ export const createTaskFormTemplate = async (taskTemplate) => {
 		description,
 		asset,
 		system,
+		location,
 		owner,
 		relatedUsers,
 		steps,
@@ -530,13 +531,20 @@ export const createTaskFormTemplate = async (taskTemplate) => {
 		description,
 		asset,
 		system,
+		location,
 		owner,
 		relatedUsers,
 		steps,
 		isUsingSteps,
+		isRepeatable: false,
+		isRepeatActive: false,
 		createdBy,
 		status: initStatus,
 		images,
+		schedule: [],
+		instances: [],
+		lastUpdatedBy: createdBy,
+		clsoedDate: null,
 	});
 
 	const savedTask = await task.save();

@@ -27,7 +27,7 @@ export const getDashboardData = async (req) => {
 		return result;
 	} catch (e) {
 		console.log(e.message);
-        return { status: 500, error: true, reason: e.message }
+		return { status: 500, error: true, reason: e.message };
 	}
 };
 
@@ -35,7 +35,7 @@ export const getItemsFilters = async (req, permLevel) => {
 	let filters = { tenant: req.user.tenant };
 
 	if (req.body.asset) {
-		filters.asset = req.body.asset
+		filters.asset = req.body.asset;
 	}
 
 	if (permLevel === 1) {
@@ -195,7 +195,9 @@ export const getPendingFaults = async (req, filters) => {
 		})
 	);
 
-    return pendingFaults.sort((a,b) => a.changeStatusDate < b.changeStatusDate ? -1 : 1)
+	return pendingFaults.sort((a, b) =>
+		a.changeStatusDate < b.changeStatusDate ? -1 : 1
+	);
 };
 
 export const calculateNext30DaysTasks = async (req, filters) => {
@@ -239,16 +241,16 @@ export const calculateNext30DaysTasks = async (req, filters) => {
 		if (bracket.data.length) result.push(bracket);
 		return result;
 	}, []);
-    let final = [];
-    brackets.forEach(b => {
-        b.data.forEach(bd => {
-            final.push({
-                date: b.date,
-                data: bd,
-                parts: b.parts
-            })
-        })
-    })
+	let final = [];
+	brackets.forEach((b) => {
+		b.data.forEach((bd) => {
+			final.push({
+				date: b.date,
+				data: bd,
+				parts: b.parts,
+			});
+		});
+	});
 	return Promise.resolve(final);
 };
 
@@ -265,50 +267,56 @@ const getDaysArray = (start, end) => {
 
 export const getLastOperations = async (req, filters) => {
 	const addQuery = {
-        ...filters,
+		...filters,
 		...getRelatedQuery(req.headers.permLevel, req.user._id),
 	};
 
-	const faults = await Fault.find({ tenant: req.user.tenant, ...addQuery }).populate('status');
-	const tasks = await Task.find({ tenant: req.user.tenant, ...addQuery }).populate('status');
+	const faults = await Fault.find({
+		tenant: req.user.tenant,
+		...addQuery,
+	}).populate("status");
+	const tasks = await Task.find({
+		tenant: req.user.tenant,
+		...addQuery,
+	}).populate("status");
 	const items = [...getIdList(faults), ...getIdList(tasks)];
 	const logs = await Log.find({ "itemData.itemIdentifier": { $in: items } })
-    .populate([
-        {
-            path: 'payload.comment',
-            model: 'Comment'
-        },
-        {
-            path: 'payload.status',
-            model: 'StatusList'
-        },
-        {
-            path: 'payload.relatedUser',
-            model: 'User',
-            select: 'avatar role firstName lastName role phoneNumber'
-        },
-        {
-            path: 'payload.owner',
-            model: 'User',
-            select: 'avatar role firstName lastName role phoneNumber'
-        },
-		{
-            path: 'payload.actionBy',
-            model: 'User',
-            select: 'avatar role firstName lastName role phoneNumber'
-        },
-        {
-            path: 'actionBy',
-            model: 'User',
-            select: 'avatar role firstName lastName role phoneNumber',
-			populate: {
-				path: 'role',
-				model: 'Role'
-			}
-        }
-    ])
+		.populate([
+			{
+				path: "payload.comment",
+				model: "Comment",
+			},
+			{
+				path: "payload.status",
+				model: "StatusList",
+			},
+			{
+				path: "payload.relatedUser",
+				model: "User",
+				select: "avatar role firstName lastName role phoneNumber",
+			},
+			{
+				path: "payload.owner",
+				model: "User",
+				select: "avatar role firstName lastName role phoneNumber",
+			},
+			{
+				path: "payload.actionBy",
+				model: "User",
+				select: "avatar role firstName lastName role phoneNumber",
+			},
+			{
+				path: "actionBy",
+				model: "User",
+				select: "avatar role firstName lastName role phoneNumber",
+				populate: {
+					path: "role",
+					model: "Role",
+				},
+			},
+		])
 		.sort({ createdAt: -1 })
-		.limit(50);
+		.limit(20);
 	return logs;
 };
 
